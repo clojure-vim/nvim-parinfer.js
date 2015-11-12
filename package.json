@@ -1,0 +1,22 @@
+{
+  "name": "Parinfer",
+  "main": "./lib/nvim-parinfer.js",
+  "version": "0.5.2",
+  "description": "Automatically infer closing parens based on indentation. An essential tool for writing LISP code.",
+  "keywords": [
+    "Parinfer",
+    "Paredit",
+    "Clojure",
+    "ClojureScript",
+    "CLJS",
+    "Lisp"
+  ],
+  "repository": "https://github.com/snoe/nvim-parinfer.js",
+  "license": "ISC",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+    "neovim-client": "1.0.5"
+  }
+}

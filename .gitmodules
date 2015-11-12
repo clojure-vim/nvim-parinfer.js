@@ -1,0 +1,3 @@
+[submodule "parinfer"]
+	path = parinfer
+	url = git@github.com:shaunlebron/parinfer.git
