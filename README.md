@@ -3,8 +3,7 @@ https://shaunlebron.github.io/parinfer
 
 # INSTALLATION
 
-update submodules and 
-`cd parinfer && lein install`
+Follow installation instructions here: https://github.com/neovim/node-host
 
 `npm install`
 
@@ -21,6 +20,8 @@ update submodules and
 - infer pars
 
 # Problems / troubleshooting
+
+This does not seem to work well with paredit, I'd suggest turning it off `let g:paredit_mode = 0`
 
 Very early, you probably want to `export NEOVIM_JS_DEBUG=/tmp/nvim-debug.log`
 
