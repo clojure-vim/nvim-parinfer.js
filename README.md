@@ -3,15 +3,21 @@ https://shaunlebron.github.io/parinfer
 
 # INSTALLATION
 
+*When you clone, the local directory name must end in `.js`*
+
+I'm using node 4.2.1 but it should work on 0.12. I don't know about node 5.0.0 however.
+
 Follow installation instructions here: https://github.com/neovim/node-host
+
+Inside this repo:
 
 `npm install`
 
-(on neovim HEAD)
+(on neovim HEAD https://github.com/neovim/neovim/wiki/Following-HEAD)
 
 `mkdir -p ~/.config/nvim/rplugin/node && ln -s $PWD ~/.config/nvim/rplugin/node`
 
-(on older neovim HEAD)
+(on older neovim)
 
 `mkdir -p ~/.nvim/rplugin/node && ln -s $PWD ~/.nvim/rplugin/node`
 
@@ -34,5 +40,4 @@ tail -f ~/.nvimlog
 tail -f /tmp/nvim-debug.log
 ```
 
-Only binding to `*.cljs` files for testing
 

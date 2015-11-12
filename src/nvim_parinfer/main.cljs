@@ -73,8 +73,8 @@
 
 (when (exists? js/plugin)
   (js/debug "hello")
-  (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs" :eval "getpos('.')"} format-buffer)
-  (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs"  :eval "getpos('.')"} format-buffer))
+  (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer)
+  (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer))
 
 (defn -main []
   #_
