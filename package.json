@@ -17,6 +17,7 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "neovim-client": "1.0.5"
+    "neovim-client": "1.0.5",
+    "diff": "2.2.0"
   }
 }

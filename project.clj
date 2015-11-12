@@ -7,9 +7,7 @@
                  [parinfer "0.1.0-SNAPSHOT"]]
 
   :npm
-  {:dependencies [[source-map-support "0.3.3"]
-                  [neovim-client "1.0.5"]
-                  [diff "2.2.0"]]}
+  {:dependencies [[source-map-support "0.3.3"]]}
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]]

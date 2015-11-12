@@ -6,7 +6,7 @@ https://shaunlebron.github.io/parinfer
 update submodules and 
 `cd parafin && lein install`
 
-`lein npm install`
+`npm install`
 
 `mkdir -p ~/.nvim/rplugin/node && ln -s $PWD ~/.nvim/rplugin/node`
 
@@ -15,10 +15,7 @@ in vim
 
 # Problems 
 
-Only binding to `*.xljs` files for testing
+Very early, you probably want to `export NEOVIM_JS_DEBUG=/tmp/nvim-debug.log`
 
-Something (maybe typing too fast) causes:
+Only binding to `*.cljs` files for testing
 
-```
-2015/11/12 01:13:43 [error @ call_set_error:743] 76515 - msgpack-rpc: Channel was closed by the client
-```
