@@ -1,3 +1,6 @@
+neovim plugin for parinfer
+https://shaunlebron.github.io/parinfer
+
 # INSTALLATION
 
 update submodules and 
