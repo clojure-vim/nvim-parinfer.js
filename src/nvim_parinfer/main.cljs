@@ -2,42 +2,67 @@
   (:require [parinfer.indent-mode :as indent-mode]
             [clojure.string :as string]))
 
-(defn dbg [v]
-  (if (exists? js/debug)
-    (js/debug (pr-str v))
-    (js/console.log (pr-str v)))
-  v)
-
+(defn dbg
+  ([v]
+   (dbg "DEBUG" v))
+  ([msg v]
+   (if (exists? js/debug)
+     (js/debug msg (pr-str v))
+     (js/console.log msg (pr-str v)))
+   v))
 
 (def result (atom nil))
 
 (defn diff [old-text new-text]
-  ;; TODO deal with multiple hunks?
-  (let [differ (if (exists? js/JsDiff) js/JsDiff (js/require "diff"))
-        diff (dbg (js->clj (.structuredPatch differ "old" "old" old-text new-text "old" "new" #js {"context" 0})))
-        hunk (first (get diff "hunks"))
-        start (dec (get hunk "oldStart"))
-        num-lines (get hunk "oldLines")
-        lines (get hunk "lines")]
-    (dbg {:line-no [start (+ start num-lines)]
-          :new-line (map (fn [line] (subs line 1)) (filter (fn [line] (= \+ (first line))) lines))})))
+  (try
+   ;; TODO deal with multiple hunks?)
+   (let [differ (if (exists? js/JsDiff) js/JsDiff (js/require "diff"))
+         diff (.structuredPatch differ "old" "old" old-text new-text "old" "new" #js {"context" 0})
+         hunk (first (aget diff "hunks"))
+         start (dec (aget hunk "oldStart"))
+         num-lines (aget hunk "oldLines")
+         lines (js->clj (aget hunk "lines"))
+         change {:line-no [start (+ start num-lines)]
+                 :new-line (map (fn [line] (subs line 1)) (filter (fn [line] (= \+ (first line))) lines))}]
+     (when (> (count (aget diff "hunks")) 1)
+       (dbg "EXTRA HUNKS"))
 
-(defn format-text [new-lines]
-  (let [new-text (string/join "\n" new-lines)
-        res @result]
-    ;; TODO pass in cursor opts
-    (if res
-      (reset! result (indent-mode/format-text-change new-text (:state res) (diff (:text res) new-text)))
-      (reset! result (indent-mode/format-text new-text)))
-    (when (not= (:text res) (:text @result))
-      @result)))
+     (comment
+      (dbg jdiff)
+      (dbg diff)
+      (dbg (= jdiff diff))
+      (js/debug diff)
+      (js/debug hunk)
+      (js/debug start)
+      (js/debug num-lines)
+      (js/debug lines))
+     (dbg "change" change)
+     change)
+   (catch js/Error e
+     (dbg "DIFF EXCEPTION" e))))
 
-(defn format-buffer [nvim]
+(defn format-text [new-lines [_ cursor-line cursor-x _]]
+  (try
+   (let [new-text (string/join "\n" new-lines)
+         opts (dbg "cursor" {:cursor-x (dec cursor-x) :cursor-line (dec cursor-line)})
+         res @result
+         old-text (:text res)]
+     (when (not= old-text new-text)
+       (if res
+         (reset! result (indent-mode/format-text-change new-text (:state res) (diff old-text new-text) opts))
+         (reset! result (indent-mode/format-text new-text opts)))
+       (when (not= (:text res) (:text @result))
+         @result)))
+   (catch js/Error e
+     (dbg "EXCEPTION" e))))
+
+(defn format-buffer [nvim cursor]
   (.getCurrentBuffer nvim
                      (fn [err buf]
                        (.getLineSlice buf 0 -1 true true
                                       (fn [err lines]
-                                        (when-let [new-result (format-text lines)]
+
+                                        (when-let [new-result (format-text lines cursor)]
                                           (->> new-result
                                                (:text)
                                                (string/split-lines)
@@ -46,11 +71,13 @@
 
 (when (exists? js/plugin)
   (js/debug "hello")
-  (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.xcljs" :eval "expand(\"<afile>\")"} format-buffer)
-  (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.xcljs"} format-buffer))
+  (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs" :eval "getpos('.')"} format-buffer)
+  (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs"  :eval "getpos('.')"} format-buffer))
 
 (defn -main []
-  (js/console.log (diff "hello\nyo\nworld" "hell\nyo")))
+  #_
+  (do
+   (dbg (format-text ["hello" "yo" "xworld"] [0 0]))
+   (dbg (format-text ["(hello" "yo" "yworld"] [0 0]))))
 
 (set! *main-cli-fn* -main)
-

@@ -2,3 +2,5 @@
 /.nrepl-port
 /.lein-repl-history
 /target
+/lib/nvim-parinfer.js.map
+/lib/nvim-parinfer/
