@@ -15,7 +15,6 @@
 
 (defn diff [old-text new-text]
   (try
-   ;; TODO deal with multiple hunks?)
    (let [differ (if (exists? js/JsDiff) js/JsDiff (js/require "diff"))
          diff (.structuredPatch differ "old" "old" old-text new-text "old" "new" #js {"context" 0})
          hunk (first (aget diff "hunks"))
@@ -24,6 +23,8 @@
          lines (js->clj (aget hunk "lines"))
          change {:line-no [start (+ start num-lines)]
                  :new-line (map (fn [line] (subs line 1)) (filter (fn [line] (= \+ (first line))) lines))}]
+
+     ;; TODO deal with multiple hunks?
      (when (> (count (aget diff "hunks")) 1)
        (dbg "EXTRA HUNKS"))
 
@@ -35,8 +36,8 @@
       (js/debug hunk)
       (js/debug start)
       (js/debug num-lines)
-      (js/debug lines))
-     (dbg "change" change)
+      (js/debug lines)
+      (dbg "change" change))
      change)
    (catch js/Error e
      (dbg "DIFF EXCEPTION" e))))
@@ -44,7 +45,7 @@
 (defn format-text [new-lines [_ cursor-line cursor-x _] buffer-results bufnum]
   (try
    (let [new-text (string/join "\n" new-lines)
-         opts (dbg "cursor" {:cursor-x (dec cursor-x) :cursor-line (dec cursor-line)})
+         opts {:cursor-x (dec cursor-x) :cursor-line (dec cursor-line)}
          res (get @buffer-results bufnum)
          old-text (:text res)]
      (when (not= old-text new-text)

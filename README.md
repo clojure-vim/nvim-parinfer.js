@@ -23,6 +23,10 @@ Follow installation instructions here: https://github.com/neovim/node-host
 
 This does not seem to work well with paredit, I'd suggest turning it off `let g:paredit_mode = 0`
 
+There's a problem with open strings, parens are inserted as you type.
+
+This is, maybe, not optimized enough - it reads and writes the entire buffer with each character change.
+
 Very early, you probably want to `export NEOVIM_JS_DEBUG=/tmp/nvim-debug.log`
 
 ```
