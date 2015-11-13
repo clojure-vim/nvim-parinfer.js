@@ -31,6 +31,8 @@ This does not seem to work well with paredit, I'd suggest turning it off `let g:
 
 There's a problem with open strings, parens are inserted as you type.
 
+The plugin sometimes crashes, especially when adding an empty line as your first change, if you get an error restart vim and make a change elsewhere in the file first.
+
 This is, maybe, not optimized enough - it reads and writes the entire buffer with each character change.
 
 Very early, you probably want to `export NEOVIM_JS_DEBUG=/tmp/nvim-debug.log`
