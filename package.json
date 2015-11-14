@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "neovim-client": "1.0.5",
+    "source-map-support": "0.3.3",
+    "ws": "0.8.0",
     "diff": "2.2.0"
   }
 }

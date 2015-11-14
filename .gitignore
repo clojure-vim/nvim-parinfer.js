@@ -1,6 +1,8 @@
 /node_modules
 /.nrepl-port
 /.lein-repl-history
+/.lein-failures
+/figwheel_server.log
 /target
 /lib/nvim-parinfer.js.map
 /lib/nvim-parinfer/

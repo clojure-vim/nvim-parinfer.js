@@ -3,59 +3,38 @@
             [clojure.string :as string]))
 
 (defn dbg
-  ([v]
-   (dbg "DEBUG" v))
-  ([msg v]
-   (if (exists? js/debug)
-     (js/debug msg (pr-str v))
-     (js/console.log msg (pr-str v)))
-   v))
+  [msg & args]
+  (if (exists? js/debug)
+    (apply js/debug msg (map pr-str args))
+    (apply js/console.log msg (map pr-str args)))
+  (first args))
+
+(defn split-lines [s]
+  (string/split s #"\r?\n" -1))
 
 (def buffer-results (atom {}))
 
-(defn diff [old-text new-text]
+(defn simple-diff [old-lines current-lines]
+  {:line-no [0 (count old-lines)]
+   :new-line current-lines})
+
+(defn run-indent [old-lines current-lines opts current-result]
+  (if current-result
+    (indent-mode/format-text-change (string/join "\n" current-lines) (:state current-result) (simple-diff old-lines current-lines) opts)
+    (indent-mode/format-text (string/join "\n" current-lines) opts)))
+
+(defn format-lines [current-lines cursor-x cursor-line buffer-results bufnum]
   (try
-   (let [differ (if (exists? js/JsDiff) js/JsDiff (js/require "diff"))
-         diff (.structuredPatch differ "old" "old" old-text new-text "old" "new" #js {"context" 0})
-         hunks (aget diff "hunks")
-         hunk (first hunks)
-         start (dec (aget hunk "oldStart"))
-         num-lines (aget hunk "oldLines")
-         lines (js->clj (aget hunk "lines"))
-         change {:line-no [start (+ start num-lines)]
-                 :new-line (map (fn [line] (subs line 1)) (filter (fn [line] (= \+ (first line))) lines))}]
+   (let [opts {:cursor-x (dec cursor-x) :cursor-line (dec cursor-line)}
+         current-result (get @buffer-results bufnum)
+         old-text (:text current-result)
+         old-lines (split-lines old-text)]
 
-     ;; TODO deal with multiple hunks?
-     (when (> (count hunks) 1)
-       (js/debug "EXTRA HUNKS" hunks))
-
-     (comment
-      (dbg jdiff)
-      (dbg diff)
-      (dbg (= jdiff diff))
-      (js/debug diff)
-      (js/debug hunk)
-      (js/debug start)
-      (js/debug num-lines)
-      (js/debug lines)
-      (dbg "change" change))
-     change)
-   (catch js/Error e
-     (dbg "DIFF EXCEPTION" e))))
-
-(defn format-text [current-lines [_ cursor-line cursor-x _] buffer-results bufnum]
-  (try
-   (let [current-text (string/join "\n" current-lines)
-         opts {:cursor-x (dec cursor-x) :cursor-line (dec cursor-line)}
-         res (get @buffer-results bufnum)
-         old-text (:text res)]
-
-     ;; current-text has changed from parinfer's state
-     (when (not= old-text current-text)
-       (let [new-result (if res
-                          (indent-mode/format-text-change current-text (:state res) (diff old-text current-text) opts)
-                          (indent-mode/format-text current-text opts))
-             new-text (:text new-result)]
+     ;; current-lines has changed from parinfer's state
+     (when (not= old-lines current-lines)
+       (let [new-result (run-indent old-lines current-lines opts current-result)
+             new-text (:text new-result)
+             new-lines (split-lines new-text)]
 
          (when-not (:valid? new-result)
            (dbg "invalid parinfer result" new-result))
@@ -63,37 +42,47 @@
          (swap! buffer-results assoc bufnum new-result)
 
          ;; parinfer changed input
-         (when (not= new-text current-text)
-           new-text))))
+         (when (not= new-lines current-lines)
+           new-lines))))
 
    (catch js/Error e
      (dbg "EXCEPTION" e))))
 
-(defn format-lines [buf lines cursor bufnum]
+(defn process-lines! [buf lines cursor-x cursor-line bufnum]
   (try
-   (when-let [new-text (format-text lines cursor buffer-results bufnum)]
-     (let [new-lines (string/split-lines new-text)]
-      (dbg "parinfer changed something" (count new-lines))
-      (.setLineSlice buf 0 -1 true true (clj->js new-lines))))
+   (when-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum)]
+     (dbg "parinfer changed something" (count new-lines))
+
+     (.setLineSlice buf 0 -1 true true (clj->js new-lines)))
 
    (catch js/Error e
      (dbg "format-lines EXCEPTION" e))))
 
 (defn format-buffer [nvim cursor]
   (try
-   (.getCurrentBuffer nvim
-                      (fn [err buf]
-                        (.getNumber buf (fn [err bufnum]
-                                          (.getLineSlice buf 0 -1 true true
-                                                         (fn [err lines]
-                                                           (format-lines buf lines cursor bufnum)))))))
+   (let [[_ cursor-line cursor-x _] cursor
+         start (js/Date.)]
+     (.getCurrentBuffer nvim
+                        (fn [err buf]
+                          (when err (js/debug err))
+                          (.getNumber buf (fn [err bufnum]
+                                            (when err (js/debug err))
+                                            (.getLineSlice buf 0 -1 true true
+                                                           (fn [err lines]
+                                                             (when err (js/debug err))
+                                                             (process-lines! buf lines cursor-x cursor-line bufnum)
+                                                             #_
+                                                             (dbg "time" (- (.getTime (js/Date.)) (.getTime start))))))))))
    (catch js/Error e
      (dbg "format-buffer" e))))
 
 (defn -main []
-  (when (exists? js/plugin)
-    (js/debug "hello nvim")
-    (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer)
-    (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer)))
+  (try
+   (when (exists? js/plugin)
+     (js/debug "hello nvim")
+     (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer)
+     (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer))
+   (catch js/Error e
+     (dbg "main exception" e))))
 
 (set! *main-cli-fn* -main)

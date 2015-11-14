@@ -1,23 +1,24 @@
 (defproject nvim-parinfer "0.1.0-SNAPSHOT"
-  :description "FIXME: write this!"
-  :url "http://example.com/FIXME"
+  :description "A neovim parinfer plugin"
+  :url "http://github.com/snoe/nvim-parinfer.js"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.170"]
+                 [org.clojure/clojurescript "1.7.145"]
                  [parinfer "0.1.0-SNAPSHOT"]
                  [org.clojure/core.async "0.2.374"]]
 
-  :npm
-  {:dependencies [[source-map-support "0.3.3"]]}
-
-  :plugins [[lein-cljsbuild "1.1.1"]
-            [lein-npm "0.6.1"]]
+  :plugins [[lein-cljsbuild "1.1.0"]
+            [lein-figwheel "0.4.1"]]
 
   :source-paths ["src" "target/classes"]
 
+  :test-paths ["test"]
+
   :clean-targets ["lib/nvim-parinfer" "lib/nvim-parinfer.js"]
 
-  :cljsbuild {:builds [{:id "dev"
+  :figwheel {:server-port 9443}
+
+  :cljsbuild {:builds [{:id "plugin"
                         :source-paths ["src"]
                         :compiler {:main nvim-parinfer.main
                                    :asset-path "lib/nvim-parinfer"
@@ -28,13 +29,12 @@
                                    :target :nodejs
                                    :cache-analysis true
                                    :source-map "lib/nvim-parinfer.js.map"}}
-                       #_
-                       {:id "lib"
-                        :source-paths ["src"]
-                        :compiler {:main nvim-parinfer.main
-                                   :output-to "lib/nvim-parinfer.js"
-                                   :output-dir "lib/nvim-parinfer"
-                                   :optimizations :simple
+                       {:id "fig-test"
+                        :source-paths ["src" "test"]
+                        :figwheel {:on-jsload "nvim-parinfer.main-test/test-it"}
+                        :compiler {:main nvim-parinfer.main-test
+                                   :output-to "target/out/tests.js"
+                                   :output-dir "target/out"
                                    :target :nodejs
-                                   :cache-analysis true
-                                   :source-map "lib/nvim-parinfer.js.map"}}]})
+                                   :optimizations :none
+                                   :source-map true}}]})
