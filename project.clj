@@ -3,18 +3,18 @@
   :url "http://github.com/snoe/nvim-parinfer.js"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.145"]
+                 [org.clojure/clojurescript "1.7.170"]
                  [parinfer "0.1.0-SNAPSHOT"]
-                 [org.clojure/core.async "0.2.374"]]
+                 [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]]
 
-  :plugins [[lein-cljsbuild "1.1.0"]
-            [lein-figwheel "0.4.1"]]
+  :plugins [[lein-cljsbuild "1.1.1"]
+            [lein-figwheel "0.5.0"]]
 
   :source-paths ["src" "target/classes"]
 
   :test-paths ["test"]
 
-  :clean-targets ["lib/nvim-parinfer" "lib/nvim-parinfer.js"]
+  :clean-targets ["lib/nvim-parinfer" "lib/nvim-parinfer.js" "target"]
 
   :figwheel {:server-port 9443}
 

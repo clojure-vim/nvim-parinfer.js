@@ -52,7 +52,6 @@
   (try
    (when-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum)]
      (dbg "parinfer changed something" (count new-lines))
-
      (.setLineSlice buf 0 -1 true true (clj->js new-lines)))
 
    (catch js/Error e
