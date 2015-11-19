@@ -16,7 +16,11 @@
   (let [buf-results (atom {})]
     (is (= ["(a" " b)" "c"] (m/format-lines ["(a" " b" "c"] 0 0 buf-results 0)))
     (is (= ["(a)" "c"] (m/format-lines ["(a" "c"] 0 0 buf-results 0)))
-    (is (= nil (m/format-lines ["(a)"] 0 0 buf-results 0)))))
+    (is (= nil (m/format-lines ["(a)"] 0 0 buf-results 0))))
+  (testing "corrects-bad-indentation-initially"
+    (let [buf-results (atom {})]
+      (is (= ["(a" " b)" ""] (m/format-lines ["(a" "b)" ""] 0 0 buf-results 0)))
+      (is (= ["(a)" "b" ""] (m/format-lines ["(a" "b)" ""] 0 0 buf-results 0))))))
 
 (deftest diffing
   (testing "no change"

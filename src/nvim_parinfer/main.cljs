@@ -1,5 +1,6 @@
 (ns nvim-parinfer.main
   (:require [parinfer.indent-mode :as indent-mode]
+            [parinfer.paren-mode :as paren-mode]
             [clojure.data :as cd]
             [clojure.string :as string]))
 
@@ -73,7 +74,9 @@
     (let [old-text (:text current-result)
           current-text (string/join "\n" current-lines)]
       (indent-mode/format-text-change current-text (:state current-result) (data-diff old-lines current-lines) opts))
-    (indent-mode/format-text (string/join "\n" current-lines) opts)))
+
+    ;; Run paren-mode format to fix any bad indentation first - otherwise this can really mess up badly formatted files
+    (indent-mode/format-text (:text (paren-mode/format-text (string/join "\n" current-lines))) opts)))
 
 (defn format-lines [current-lines cursor-x cursor-line buffer-results bufnum]
   (try
