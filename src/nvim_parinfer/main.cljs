@@ -1,5 +1,6 @@
 (ns nvim-parinfer.main
   (:require [parinfer.indent-mode :as indent-mode]
+            [clojure.data :as cd]
             [clojure.string :as string]))
 
 (defn dbg
@@ -14,13 +15,64 @@
 
 (def buffer-results (atom {}))
 
-(defn simple-diff [old-lines current-lines]
-  {:line-no [0 (count old-lines)]
-   :new-line current-lines})
+(defn index-changes [[only-old only-cur in-both]]
+  (reduce (fn [accum i]
+            ;; default to false so I can use nil? to differentiate
+            (let [old (get only-old i false)
+                  cur (get only-cur i false)
+                  both (get in-both i false)]
+              (cond-> accum
+                (and old (not (:old-start accum)))
+                (assoc :old-start i)
+
+                old
+                (assoc :old-end i)
+
+                (and cur (not (:new-start accum)))
+                (assoc :new-start i)
+
+                cur
+                (assoc :new-end i)
+
+                (and (nil? old) (not cur) both)
+                (assoc :new-end i))))
+
+          {}
+          (range (max (count only-old) (count only-cur) (count in-both)))))
+
+(defn data-diff [old-lines current-lines]
+  (let [diff (cd/diff old-lines current-lines)
+        [only-old only-cur both] diff]
+
+    (cond
+     (and only-old only-cur both)
+     (let [diff (cd/diff old-lines current-lines)
+           {:keys [old-start old-end new-start new-end]} (index-changes diff)
+           new-line (subvec current-lines new-start (inc new-end))]
+       {:line-no [old-start (inc old-end)]
+        :new-line new-line})
+
+     (and only-cur both)
+     (let [{:keys [old-start old-end new-start new-end]} (index-changes diff)]
+       {:line-no [new-start (inc new-start)]
+        :new-line (subvec current-lines new-start (inc new-end))})
+
+     (and only-old only-cur)
+     {:line-no [0 (count only-old)] :new-line only-cur}
+
+     (and only-old both)
+     (let [e (count only-old)
+           s (count both)]
+       {:line-no [s e] :new-line []})
+
+     both
+     {:line-no [0 0] :new-line []})))
 
 (defn run-indent [old-lines current-lines opts current-result]
   (if current-result
-    (indent-mode/format-text-change (string/join "\n" current-lines) (:state current-result) (simple-diff old-lines current-lines) opts)
+    (let [old-text (:text current-result)
+          current-text (string/join "\n" current-lines)]
+      (indent-mode/format-text-change current-text (:state current-result) (data-diff old-lines current-lines) opts))
     (indent-mode/format-text (string/join "\n" current-lines) opts)))
 
 (defn format-lines [current-lines cursor-x cursor-line buffer-results bufnum]
@@ -61,6 +113,9 @@
   (try
    (let [[_ cursor-line cursor-x _] cursor
          start (js/Date.)]
+
+     #_
+     (dbg "start")
      (.getCurrentBuffer nvim
                         (fn [err buf]
                           (when err (js/debug err))
@@ -71,7 +126,10 @@
                                                              (when err (js/debug err))
                                                              (process-lines! buf lines cursor-x cursor-line bufnum)
                                                              #_
-                                                             (dbg "time" (- (.getTime (js/Date.)) (.getTime start))))))))))
+                                                             (dbg "Done!" (- (.getTime (js/Date.)) (.getTime start)))))))))
+
+     #_
+     (dbg "time" (- (.getTime (js/Date.)) (.getTime start))))
    (catch js/Error e
      (dbg "format-buffer" e))))
 
