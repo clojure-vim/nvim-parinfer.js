@@ -34,8 +34,6 @@ This does not seem to work well with paredit's insert mappings, I'd suggest turn
 
 If you are using vim-sexp, I suggest turning off insert mode mappings `let g:sexp_enable_insert_mode_mappings = 0`
 
-The plugin sometimes crashes, especially when adding an empty line as your first change, if you get an error restart vim and make a change elsewhere in the file first. (see node-host instructions above for a fix)
-
 This is, maybe, not optimized enough - it reads and writes the entire buffer with each character change.
 
 # Development
