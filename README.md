@@ -1,30 +1,30 @@
 neovim plugin for parinfer
 https://shaunlebron.github.io/parinfer
 
-# INSTALLATION
+[Changelog](CHANGES.md)
+
+# Installation
 
 *When you clone, the local directory name must end in `.js`*
 
+### Pre-requisites
 [Install node.js](https://nodejs.org)
 
 [Install latest neovim](https://github.com/neovim/neovim/wiki/Installing-Neovim)
 
-[Install node-host](https://github.com/neovim/node-host) *BUT* there's a [bug](https://github.com/neovim/node-client/issues/8) in this library that crashes the plugin!
+[Install node-host](https://github.com/neovim/node-host)
 
-To work around it, copy [this file](https://github.com/snoe/node-client/blob/master/index.js) to `~/.config/nvim/bundle/node-host/node_modules/neovim-client/`
-
-Inside this repo:
+### Inside this repo:
 
 `npm install`
 
 `mkdir -p ~/.config/nvim/rplugin/node && ln -s $PWD ~/.config/nvim/rplugin/node`
 (neovim [moved the config location here](https://github.com/neovim/neovim/wiki/Following-HEAD))
 
-- in nvim `:UpdateRemotePlugins` you should see `remote/host: node host registered plugins ['nvim-parinfer.js']` 
+### Inside nvim
+- `:UpdateRemotePlugins` you should see `remote/host: node host registered plugins ['nvim-parinfer.js']` 
 - *restart* nvim
 - infer pars
-
-# [CHANGELOG](CHANGES.md)
 
 # Problems / troubleshooting
 
