@@ -5,8 +5,6 @@ https://shaunlebron.github.io/parinfer
 
 # Installation
 
-*When you clone, the local directory name must end in `.js`*
-
 ### Pre-requisites
 [Install node.js](https://nodejs.org)
 
@@ -14,21 +12,23 @@ https://shaunlebron.github.io/parinfer
 
 [Install node-host](https://github.com/neovim/node-host)
 
-### Inside this repo:
+### Vundle
 
-`npm install`
+Using Vundle, add this to your vundle .config/nvim/init.vim section:
 
-`mkdir -p ~/.config/nvim/rplugin/node && ln -s $PWD ~/.config/nvim/rplugin/node`
-(neovim [moved the config location here](https://github.com/neovim/neovim/wiki/Following-HEAD))
+```
+Plugin 'snoe/nvim-parinfer.js'
+```
 
 ### Inside nvim
+- `:PluginInstall`
 - `:UpdateRemotePlugins` you should see `remote/host: node host registered plugins ['nvim-parinfer.js']` 
 - *restart* nvim
 - infer pars
 
 # Problems / troubleshooting
 
-Undo after normal mode changes doesn't work well because parinfer's changes go to the top of the stack and popping just causes parinfer to run again.
+Undo after normal mode changes doesn't work well because parinfer's changes go to the top of the stack and popping just causes parinfer to run again. Use `2u` to pop two things off the stack if you run into this situation.
 
 This does not seem to work well with paredit's insert mappings, I'd suggest turning it off `let g:paredit_mode = 0`
 

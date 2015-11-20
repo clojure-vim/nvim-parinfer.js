@@ -1,3 +1,6 @@
+#0.2.0
+- Moved library to rplugin/node you can now install/update with Vundle.
+
 #0.1.3
 - Bump neovim-client version. 
 - IMPORTANT you need to `cd ~/.config/nvim/bundle/node-host && npm upgrade` to fix a bug in the plugin host that caused the parinfer to crash (should use `neovim-client 1.0.6` dependency)
