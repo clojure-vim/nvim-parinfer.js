@@ -4,7 +4,7 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.170"]
-                 [parinfer "0.1.0-SNAPSHOT"]
+                 [parinfer "0.1.0"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]]
 
   :plugins [[lein-cljsbuild "1.1.1"]
