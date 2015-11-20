@@ -38,9 +38,6 @@ This is, maybe, not optimized enough - it reads and writes the entire buffer wit
 
 # Development
 
-You need to update sub-modules and
-`cd parinfer && lein install`
-
 ###  To build
 `lein cljsbuild auto plugin`
 
