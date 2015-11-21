@@ -1,3 +1,6 @@
+#0.2.1
+- Better undo handling.
+
 #0.2.0
 - Moved library to rplugin/node you can now install/update with Vundle.
 

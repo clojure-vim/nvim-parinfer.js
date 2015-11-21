@@ -28,8 +28,6 @@ Plugin 'snoe/nvim-parinfer.js'
 
 # Problems / troubleshooting
 
-Undo after normal mode changes doesn't work well because parinfer's changes go to the top of the stack and popping just causes parinfer to run again. Use `2u` to pop two things off the stack if you run into this situation.
-
 This does not seem to work well with paredit's insert mappings, I'd suggest turning it off `let g:paredit_mode = 0`
 
 If you are using vim-sexp, I suggest turning off insert mode mappings `let g:sexp_enable_insert_mode_mappings = 0`

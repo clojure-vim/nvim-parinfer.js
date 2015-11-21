@@ -1,8 +1,9 @@
 (ns nvim-parinfer.main
-  (:require [parinfer.indent-mode :as indent-mode]
-            [parinfer.paren-mode :as paren-mode]
-            [clojure.data :as cd]
-            [clojure.string :as string]))
+  (:require
+   [parinfer.indent-mode :as indent-mode]
+   [parinfer.paren-mode :as paren-mode]
+   [clojure.data :as cd]
+   [clojure.string :as string]))
 
 (defn dbg
   [msg & args]
@@ -103,45 +104,53 @@
    (catch js/Error e
      (dbg "EXCEPTION" e))))
 
-(defn process-lines! [buf lines cursor-x cursor-line bufnum]
+(defonce buffer-sync-lines (atom {}))
+
+(defn process-lines! [nvim buf lines cursor-x cursor-line bufnum]
   (try
    (when-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum)]
      (dbg "parinfer changed something" (count new-lines))
-     (.setLineSlice buf 0 -1 true true (clj->js new-lines)))
+
+     ;; This MAY lead to a race condition. Right now, it's probably worth it to have undo work better.
+     ;; Worried about
+     ;; - a very expensive command changes the buffer and a quick command comes in succesion (or vice versa?)
+     (swap! buffer-sync-lines assoc bufnum (clj->js new-lines))
+     (.command nvim "undojoin | ParInferSyncLines")
+     #_(.setLineSlice buf 0 -1 true true (clj->js new-lines)))
 
    (catch js/Error e
      (dbg "format-lines EXCEPTION" e))))
 
-(defn format-buffer [nvim cursor]
+(defn format-buffer [nvim [cursor bufnum]]
   (try
    (let [[_ cursor-line cursor-x _] cursor
          start (js/Date.)]
 
-     #_
-     (dbg "start")
+     #_(js/debug "start" cursor bufnum)
      (.getCurrentBuffer nvim
                         (fn [err buf]
                           (when err (js/debug err))
-                          (.getNumber buf (fn [err bufnum]
-                                            (when err (js/debug err))
-                                            (.getLineSlice buf 0 -1 true true
-                                                           (fn [err lines]
-                                                             (when err (js/debug err))
-                                                             (process-lines! buf lines cursor-x cursor-line bufnum)
-                                                             #_
-                                                             (dbg "Done!" (- (.getTime (js/Date.)) (.getTime start)))))))))
+                          (.getLineSlice buf 0 -1 true true
+                                         (fn [err lines]
+                                           (when err (js/debug err))
+                                           (process-lines! nvim buf lines cursor-x cursor-line bufnum)
+                                           #_(dbg "Done!" (- (.getTime (js/Date.)) (.getTime start))))))))
 
-     #_
-     (dbg "time" (- (.getTime (js/Date.)) (.getTime start))))
    (catch js/Error e
      (dbg "format-buffer" e))))
+
+(defn sync-lines [nvim bufnum]
+  (when-let [lines (get @buffer-sync-lines bufnum)]
+    (.getCurrentBuffer nvim (fn [err buf] (.setLineSlice buf 0 -1 true true lines))))
+  (swap! buffer-sync-lines dissoc bufnum))
 
 (defn -main []
   (try
    (when (exists? js/plugin)
      (js/debug "hello nvim")
-     (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer)
-     (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs,*.clj,*.edn" :eval "getpos('.')"} format-buffer))
+     (.commandSync js/plugin "ParInferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
+     (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs,*.clj,*.edn" :eval "[getpos('.'), bufnr('.')]"} format-buffer)
+     (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs,*.clj,*.edn" :eval "[getpos('.'), bufnr('.')]"} format-buffer))
    (catch js/Error e
      (dbg "main exception" e))))
 
