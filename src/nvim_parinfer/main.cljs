@@ -121,23 +121,24 @@
    (catch js/Error e
      (dbg "format-lines EXCEPTION" e))))
 
-(defn format-buffer [nvim [cursor bufnum]]
-  (try
-   (let [[_ cursor-line cursor-x _] cursor
-         start (js/Date.)]
+(defn format-buffer [nvim [enabled cursor bufnum]]
+  (if (pos? enabled)
+    (try
+     (let [[_ cursor-line cursor-x _] cursor
+           start (js/Date.)]
 
-     #_(js/debug "start" cursor bufnum)
-     (.getCurrentBuffer nvim
-                        (fn [err buf]
-                          (when err (js/debug err))
-                          (.getLineSlice buf 0 -1 true true
-                                         (fn [err lines]
-                                           (when err (js/debug err))
-                                           (process-lines! nvim buf lines cursor-x cursor-line bufnum)
-                                           #_(dbg "Done!" (- (.getTime (js/Date.)) (.getTime start))))))))
+       #_(js/debug "start" cursor bufnum)
+       (.getCurrentBuffer nvim
+                          (fn [err buf]
+                            (when err (js/debug err))
+                            (.getLineSlice buf 0 -1 true true
+                                           (fn [err lines]
+                                             (when err (js/debug err))
+                                             (process-lines! nvim buf lines cursor-x cursor-line bufnum)
+                                             #_(dbg "Done!" (- (.getTime (js/Date.)) (.getTime start))))))))
 
-   (catch js/Error e
-     (dbg "format-buffer" e))))
+     (catch js/Error e
+       (dbg "format-buffer" e)))))
 
 (defn sync-lines [nvim bufnum]
   (when-let [lines (get @buffer-sync-lines bufnum)]
@@ -149,8 +150,14 @@
    (when (exists? js/plugin)
      (js/debug "hello nvim")
      (.commandSync js/plugin "ParInferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
-     (.autocmdSync js/plugin "BufEnter" #js {:pattern "*.cljs,*.clj,*.edn" :eval "[getpos('.'), bufnr('.')]"} format-buffer)
-     (.autocmdSync js/plugin "TextChanged,TextChangedI" #js {:pattern "*.cljs,*.clj,*.edn" :eval "[getpos('.'), bufnr('.')]"} format-buffer))
+     (.autocmdSync js/plugin "BufEnter"
+                   #js {:pattern "*.cljs,*.clj,*.edn"
+                        :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
+                   format-buffer)
+     (.autocmdSync js/plugin "TextChanged,TextChangedI"
+                   #js {:pattern "*.cljs,*.clj,*.edn"
+                        :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
+                   format-buffer))
    (catch js/Error e
      (dbg "main exception" e))))
 

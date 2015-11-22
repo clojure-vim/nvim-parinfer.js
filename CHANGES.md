@@ -1,3 +1,6 @@
+#0.2.2
+- Flag to turn off plugin - you need to run `:UpdateRemotePlugins`.
+
 #0.2.1
 - Better undo handling.
 

@@ -26,6 +26,10 @@ Plugin 'snoe/nvim-parinfer.js'
 - *restart* nvim
 - infer pars
 
+### Using it
+
+You can `let g:parinfer_mode 0` to turn off the plugin.
+
 # Problems / troubleshooting
 
 This does not seem to work well with paredit's insert mappings, I'd suggest turning it off `let g:paredit_mode = 0`
