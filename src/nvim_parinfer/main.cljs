@@ -151,11 +151,11 @@
      (js/debug "hello nvim")
      (.commandSync js/plugin "ParInferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
      (.autocmdSync js/plugin "BufEnter"
-                   #js {:pattern "*.cljs,*.clj,*.edn"
+                   #js {:pattern "*.clj*,*.edn"
                         :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
                    format-buffer)
      (.autocmdSync js/plugin "TextChanged,TextChangedI"
-                   #js {:pattern "*.cljs,*.clj,*.edn"
+                   #js {:pattern "*.clj*,*.edn"
                         :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
                    format-buffer))
    (catch js/Error e
