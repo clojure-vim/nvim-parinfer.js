@@ -44,7 +44,11 @@ This is, maybe, not optimized enough - it reads and writes the entire buffer wit
 `lein cljsbuild auto plugin`
 
 ### To test
+In one shell:
 `rlwrap lein figwheel fig-test`
+
+In another shell:
+`node target/out/tests.js`
 
 If you want to see what the plugin is doing, you probably want to:
 ```

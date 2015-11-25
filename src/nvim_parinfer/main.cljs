@@ -92,14 +92,12 @@
              new-text (:text new-result)
              new-lines (split-lines new-text)]
 
-         (when-not (:valid? new-result)
-           (dbg "invalid parinfer result" new-result))
+         (when (:valid? new-result)
+           (swap! buffer-results assoc bufnum new-result)
 
-         (swap! buffer-results assoc bufnum new-result)
-
-         ;; parinfer changed input
-         (when (not= new-lines current-lines)
-           new-lines))))
+           ;; parinfer changed input
+           (when (not= new-lines current-lines)
+             new-lines)))))
 
    (catch js/Error e
      (dbg "EXCEPTION" e))))
