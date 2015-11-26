@@ -1,3 +1,7 @@
+#0.2.4
+- Change commands to non-sync versions since it seems impossible to synchronize the rpc calls anyhow
+- You need to run `:UpdateRemotePlugins`.
+
 #0.2.3
 - Turn on plugin in all `.clj*` files - you need to run `:UpdateRemotePlugins`.
 

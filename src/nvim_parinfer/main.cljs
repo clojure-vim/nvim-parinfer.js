@@ -113,7 +113,7 @@
      ;; Worried about
      ;; - a very expensive command changes the buffer and a quick command comes in succesion (or vice versa?)
      (swap! buffer-sync-lines assoc bufnum (clj->js new-lines))
-     (.command nvim "undojoin | ParInferSyncLines")
+     (.command nvim "undojoin | ParinferSyncLines")
      #_(.setLineSlice buf 0 -1 true true (clj->js new-lines)))
 
    (catch js/Error e
@@ -147,12 +147,12 @@
   (try
    (when (exists? js/plugin)
      (js/debug "hello nvim")
-     (.commandSync js/plugin "ParInferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
-     (.autocmdSync js/plugin "BufEnter"
+     (.command js/plugin "ParinferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
+     (.autocmd js/plugin "BufEnter"
                    #js {:pattern "*.clj*,*.edn"
                         :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
                    format-buffer)
-     (.autocmdSync js/plugin "TextChanged,TextChangedI"
+     (.autocmd js/plugin "TextChanged,TextChangedI"
                    #js {:pattern "*.clj*,*.edn"
                         :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
                    format-buffer))
