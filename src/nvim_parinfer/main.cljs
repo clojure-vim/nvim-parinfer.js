@@ -3,7 +3,8 @@
    [parinfer.indent-mode :as indent-mode]
    [parinfer.paren-mode :as paren-mode]
    [clojure.data :as cd]
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [cljsjs.jsdiff]))
 
 (defn dbg
   [msg & args]
@@ -42,6 +43,55 @@
           {}
           (range (max (count only-old) (count only-cur) (count in-both)))))
 
+(defn index-jsdiff [diff]
+  (dissoc
+   (reduce (fn [changes [i d]]
+             (let [{:strs [added removed value] :as c} (js->clj d)
+                   numchange (get c "count" 1)
+                   numlines (count (filter #{"\n"} value))
+                   skipped (:skipped changes)
+                   patched (:patched changes)]
+               (dbg "c" (:line-no changes) skipped c)
+               (cond-> changes
+                 (and (or added removed) patched)
+                 (->
+                   (update :new-line concat (string/split-lines (:skipped-value changes)))
+                   (dissoc :skipped-value))
+
+                 added
+                 (->
+                   (update :new-line concat (string/split-lines value)))
+
+                 (and (or added removed) (not patched))
+                 (->
+                    (update-in [:line-no 0] + skipped)
+                    (assoc :patched true)
+                    (dissoc :skipped-value))
+
+                 removed
+                 (->
+                   (update-in [:line-no 1] + skipped numchange)
+                   (dissoc :skipped))
+
+                 (not (or added removed))
+                 (->
+                   (assoc :skipped-value value)
+                   (update :skipped + numlines)))))
+           {:line-no [0 0]
+            :new-line []}
+           (map-indexed vector diff))
+   :skipped :skipped-value :patched))
+
+(defn data-diff [old-lines current-lines]
+  (let [jsdiff js/JsDiff
+        diff (jsdiff.diffLines
+              (string/join "\n" (dbg "ol" old-lines))
+              (string/join "\n" (dbg "cl" current-lines)))]
+
+    (dbg "jhi" diff)
+    (index-jsdiff diff)))
+
+#_
 (defn data-diff [old-lines current-lines]
   (let [diff (cd/diff old-lines current-lines)
         [only-old only-cur both] diff]
@@ -49,8 +99,9 @@
     (cond
      (and only-old only-cur both)
      (let [diff (cd/diff old-lines current-lines)
-           {:keys [old-start old-end new-start new-end]} (index-changes diff)
+           {:keys [old-start old-end new-start new-end] :as index} (index-changes diff)
            new-line (subvec current-lines new-start (inc new-end))]
+       (dbg "index" index diff)
        {:line-no [old-start (inc old-end)]
         :new-line new-line})
 
@@ -86,6 +137,7 @@
          old-text (:text current-result)
          old-lines (split-lines old-text)]
 
+     (js/debug "has?" (boolean current-result))
      ;; current-lines has changed from parinfer's state
      (when (not= old-lines current-lines)
        (let [new-result (run-indent old-lines current-lines opts current-result)
@@ -143,15 +195,33 @@
     (.getCurrentBuffer nvim (fn [err buf] (.setLineSlice buf 0 -1 true true lines))))
   (swap! buffer-sync-lines dissoc bufnum))
 
+(defn parinfer-indent
+  [nvim args [[_ cursor-line cursor-x _] bufnum lines]]
+  (let [start (js/Date.)]
+    (js/debug "from:" args bufnum)
+    (if-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum)]
+      (do
+       (js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
+       (clj->js new-lines))
+      (do
+       (js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
+       (clj->js [])))))
+
 (defn -main []
   (try
    (when (exists? js/plugin)
      (js/debug "hello nvim")
+     (.functionSync js/plugin "ParinferIndent"
+                    #js {:eval "[getpos('.'), bufnr('.'), getline(1,line('$'))]"}
+                    parinfer-indent)
+     #_
      (.command js/plugin "ParinferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
+     #_
      (.autocmd js/plugin "BufEnter"
                    #js {:pattern "*.clj*,*.edn"
                         :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
                    format-buffer)
+     #_
      (.autocmd js/plugin "TextChanged,TextChangedI"
                    #js {:pattern "*.clj*,*.edn"
                         :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}

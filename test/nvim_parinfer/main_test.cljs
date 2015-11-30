@@ -9,6 +9,7 @@
 (def -main (fn [] nil))
 (set! *main-cli-fn* -main) ;; this is required
 
+#_
 (deftest format-lines
   (is (= nil (m/format-lines ["a" "b" ""] 0 0 (atom {}) 0)))
   (is (= ["(a)" "b" ""] (m/format-lines ["(a" "b" ""] 0 0 (atom {}) 0)))
@@ -34,6 +35,8 @@
     (is (= {:line-no [0 2] :new-line ["1" "2"]}
            (m/data-diff ["a" "b"] ["1" "2"]))))
   (testing "add at end"
+    (is (= {:line-no [1 2] :new-line ["b" "3"]}
+           (m/data-diff ["a" "b"] ["a" "b" "3"])))
     (is (= {:line-no [1 2] :new-line ["2" "3"]}
            (m/data-diff ["a" "b"] ["a" "2" "3"])))
     (is (= {:line-no [1 2] :new-line ["2" "3" "4"]}
@@ -41,18 +44,20 @@
     (is (= {:line-no [1 2] :new-line ["2" "3" "4"]}
            (m/data-diff ["a" "b"] ["a" "2" "3" "4"])))
     (is (= {:line-no [2 3] :new-line ["3" "4"]}
-           (m/data-diff ["a" "b"] ["a" "b" "3" "4"]))))
+           (m/data-diff ["a" "b" "3"] ["a" "b" "3" "4"]))))
 
   (testing "remove from end"
-    (is (= {:line-no [1 2] :new-line []}
+    (is (= {:line-no [0 1] :new-line []}
+           (m/data-diff ["a"] [])))
+    (is (= {:line-no [0 2] :new-line ["a"]}
            (m/data-diff ["a" "b"] ["a"])))
-    (is (= {:line-no [2 3] :new-line []}
+    (is (= {:line-no [1 3] :new-line ["b"]}
            (m/data-diff ["a" "b" "c"] ["a" "b"]))))
 
   (testing "remove from start"
-    (is (= {:line-no [0 2] :new-line ["b"]}
+    (is (= {:line-no [0 1] :new-line []}
            (m/data-diff ["a" "b"] ["b"])))
-    (is (= {:line-no [0 3] :new-line ["b" "c"]}
+    (is (= {:line-no [0 1] :new-line []}
            (m/data-diff ["a" "b" "c"] ["b" "c"]))))
   (testing "remove and change"
     (is (= {:line-no [1 3] :new-line ["x"]}
@@ -74,6 +79,12 @@
            (m/data-diff ["a" "b" "c"] ["a" "x" "c"])))
     (is (= {:line-no [1 3] :new-line ["1" "2"]}
            (m/data-diff ["a" "b" "c" "d"] ["a" "1" "2" "d"]))))
+  (testing "add to start"
+    (is (= {:line-no [0 0] :new-line ["1"]}
+           (m/data-diff ["a" "b" "c"] ["1" "a" "b" "c"]))))
+  (testing "add to start and end"
+    (is (= {:line-no [0 3] :new-line ["1" "a" "b" "c" "2"]}
+           (m/data-diff ["a" "b" "c"] ["1" "a" "b" "c" "2"]))))
 
   (is (= {:line-no [1 15] :new-line ["c" "d" "1" "2" "e" "3" "g" "h" "i" "j" "l" "m"]}
          (m/data-diff ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o"]
