@@ -1,3 +1,8 @@
+#0.3.0
+- Move to only running parinfer in node-host, put vimmy stuff like undojoin in `plugin/parinfer.vim`
+- You need to run `:UpdateRemotePlugins`.
+- You need to make sure the plugin is installed with vundle/pathogen or link in `plugin`
+
 #0.2.4
 - Change commands to non-sync versions since it seems impossible to synchronize the rpc calls anyhow
 - You need to run `:UpdateRemotePlugins`.
