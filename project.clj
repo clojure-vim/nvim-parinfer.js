@@ -29,6 +29,7 @@
                                    :optimizations :simple
                                    :target :nodejs
                                    :cache-analysis true
+                                   :externs ["plugin.externs.js"]
                                    :source-map "rplugin/node/nvim-parinfer.js.map"}}
                        {:id "fig-test"
                         :source-paths ["src" "test"]

@@ -13,220 +13,116 @@
     (apply js/console.log msg (map pr-str args)))
   (first args))
 
+
+(defn clean-value [value]
+  (string/replace value #"\r?\n$" ""))
+
 (defn split-lines [s]
-  (string/split s #"\r?\n" -1))
+  (when s
+    (string/split (clean-value s) #"\r?\n" -1)))
 
 (def buffer-results (atom {}))
 
-(defn index-changes [[only-old only-cur in-both]]
-  (reduce (fn [accum i]
-            ;; default to false so I can use nil? to differentiate
-            (let [old (get only-old i false)
-                  cur (get only-cur i false)
-                  both (get in-both i false)]
-              (cond-> accum
-                (and old (not (:old-start accum)))
-                (assoc :old-start i)
-
-                old
-                (assoc :old-end i)
-
-                (and cur (not (:new-start accum)))
-                (assoc :new-start i)
-
-                cur
-                (assoc :new-end i)
-
-                (and (nil? old) (not cur) both)
-                (assoc :new-end i))))
-
-          {}
-          (range (max (count only-old) (count only-cur) (count in-both)))))
-
 (defn index-jsdiff [diff]
-  (dissoc
-   (reduce (fn [changes [i d]]
-             (let [{:strs [added removed value] :as c} (js->clj d)
-                   numchange (get c "count" 1)
-                   numlines (count (filter #{"\n"} value))
-                   skipped (:skipped changes)
-                   patched (:patched changes)]
-               (dbg "c" (:line-no changes) skipped c)
-               (cond-> changes
-                 (and (or added removed) patched)
-                 (->
-                   (update :new-line concat (string/split-lines (:skipped-value changes)))
-                   (dissoc :skipped-value))
+  (update
+    (dissoc
+     (reduce (fn [changes [i d]]
+               (let [{:strs [added removed value] :as c} (js->clj d)
+                     numchange (get c "count" 1)
+                     skipped (:skipped changes)
+                     patched (:patched changes)]
+                 (cond-> changes
+                   (and (or added removed) patched)
+                   (->
+                     (update :new-line concat (split-lines (:skipped-value changes)))
+                     (dissoc :skipped-value))
 
-                 added
-                 (->
-                   (update :new-line concat (string/split-lines value)))
+                   added
+                   (->
+                     (update :new-line concat (split-lines value)))
 
-                 (and (or added removed) (not patched))
-                 (->
-                    (update-in [:line-no 0] + skipped)
-                    (assoc :patched true)
-                    (dissoc :skipped-value))
+                   (and (or added removed) (not patched))
+                   (->
+                      (update-in [:line-no 0] + skipped)
+                      (assoc :patched true)
+                      (dissoc :skipped-value))
 
-                 removed
-                 (->
-                   (update-in [:line-no 1] + skipped numchange)
-                   (dissoc :skipped))
+                   removed
+                   (->
+                     (update-in [:line-no 1] + skipped numchange)
+                     (dissoc :skipped))
 
-                 (not (or added removed))
-                 (->
-                   (assoc :skipped-value value)
-                   (update :skipped + numlines)))))
-           {:line-no [0 0]
-            :new-line []}
-           (map-indexed vector diff))
-   :skipped :skipped-value :patched))
+                   (not (or added removed))
+                   (->
+                     (assoc :skipped-value value)
+                     (update :skipped + numchange)))))
+             {:line-no [0 0]
+              :new-line []}
+             (map-indexed vector diff))
+     :skipped :skipped-value :patched)
+    :line-no (fn [[a b]] [a (max a b)])))
 
-(defn data-diff [old-lines current-lines]
-  (let [jsdiff js/JsDiff
-        diff (jsdiff.diffLines
-              (string/join "\n" (dbg "ol" old-lines))
-              (string/join "\n" (dbg "cl" current-lines)))]
+(def jsdiff
+  (if (exists? js/JsDiff)
+    js/JsDiff
+    js/module.exports))
 
-    (dbg "jhi" diff)
+(defn text-diff [old-text current-text]
+  (let [diff (jsdiff.diffLines old-text current-text)]
     (index-jsdiff diff)))
 
-#_
 (defn data-diff [old-lines current-lines]
-  (let [diff (cd/diff old-lines current-lines)
-        [only-old only-cur both] diff]
+  (text-diff
+   (string/join "\n" old-lines)
+   (string/join "\n" current-lines)))
 
-    (cond
-     (and only-old only-cur both)
-     (let [diff (cd/diff old-lines current-lines)
-           {:keys [old-start old-end new-start new-end] :as index} (index-changes diff)
-           new-line (subvec current-lines new-start (inc new-end))]
-       (dbg "index" index diff)
-       {:line-no [old-start (inc old-end)]
-        :new-line new-line})
-
-     (and only-cur both)
-     (let [{:keys [old-start old-end new-start new-end]} (index-changes diff)]
-       {:line-no [new-start (inc new-start)]
-        :new-line (subvec current-lines new-start (inc new-end))})
-
-     (and only-old only-cur)
-     {:line-no [0 (count only-old)] :new-line only-cur}
-
-     (and only-old both)
-     (let [e (count only-old)
-           s (count both)]
-       {:line-no [s e] :new-line []})
-
-     both
-     {:line-no [0 0] :new-line []})))
-
-(defn run-indent [old-lines current-lines opts current-result]
-  (if current-result
-    (let [old-text (:text current-result)
-          current-text (string/join "\n" current-lines)]
-      (indent-mode/format-text-change current-text (:state current-result) (data-diff old-lines current-lines) opts))
-
+(defn run-indent [old-state old-text current-text opts]
+  (if old-text
+    (indent-mode/format-text-change current-text old-state (text-diff old-text current-text) opts)
     ;; Run paren-mode format to fix any bad indentation first - otherwise this can really mess up badly formatted files
-    (indent-mode/format-text (:text (paren-mode/format-text (string/join "\n" current-lines))) opts)))
+    (indent-mode/format-text (:text (paren-mode/format-text current-text)) opts)))
 
 (defn format-lines [current-lines cursor-x cursor-line buffer-results bufnum]
   (try
    (let [opts {:cursor-x (dec cursor-x) :cursor-line (dec cursor-line)}
-         current-result (get @buffer-results bufnum)
-         old-text (:text current-result)
-         old-lines (split-lines old-text)]
+         current-text (clean-value (string/join "\n" current-lines))
+         old-result (get @buffer-results bufnum)
+         old-text (:text old-result)]
 
-     (js/debug "has?" (boolean current-result))
      ;; current-lines has changed from parinfer's state
-     (when (not= old-lines current-lines)
-       (let [new-result (run-indent old-lines current-lines opts current-result)
-             new-text (:text new-result)
-             new-lines (split-lines new-text)]
+     (when (not= old-text current-text)
+       (let [new-result (run-indent (:state old-result) old-text current-text opts)
+             new-text (:text new-result)]
 
          (when (:valid? new-result)
            (swap! buffer-results assoc bufnum new-result)
 
            ;; parinfer changed input
-           (when (not= new-lines current-lines)
-             new-lines)))))
+           (when (not= new-text current-text)
+             (split-lines new-text))))))
 
-   (catch js/Error e
-     (dbg "EXCEPTION" e))))
-
-(defonce buffer-sync-lines (atom {}))
-
-(defn process-lines! [nvim buf lines cursor-x cursor-line bufnum]
-  (try
-   (when-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum)]
-     (dbg "parinfer changed something" (count new-lines))
-
-     ;; This MAY lead to a race condition. Right now, it's probably worth it to have undo work better.
-     ;; Worried about
-     ;; - a very expensive command changes the buffer and a quick command comes in succesion (or vice versa?)
-     (swap! buffer-sync-lines assoc bufnum (clj->js new-lines))
-     (.command nvim "undojoin | ParinferSyncLines")
-     #_(.setLineSlice buf 0 -1 true true (clj->js new-lines)))
-
-   (catch js/Error e
-     (dbg "format-lines EXCEPTION" e))))
-
-(defn format-buffer [nvim [enabled cursor bufnum]]
-  (if (pos? enabled)
-    (try
-     (let [[_ cursor-line cursor-x _] cursor
-           start (js/Date.)]
-
-       #_(js/debug "start" cursor bufnum)
-       (.getCurrentBuffer nvim
-                          (fn [err buf]
-                            (when err (js/debug err))
-                            (.getLineSlice buf 0 -1 true true
-                                           (fn [err lines]
-                                             (when err (js/debug err))
-                                             (process-lines! nvim buf lines cursor-x cursor-line bufnum)
-                                             #_(dbg "Done!" (- (.getTime (js/Date.)) (.getTime start))))))))
-
-     (catch js/Error e
-       (dbg "format-buffer" e)))))
-
-(defn sync-lines [nvim bufnum]
-  (when-let [lines (get @buffer-sync-lines bufnum)]
-    (.getCurrentBuffer nvim (fn [err buf] (.setLineSlice buf 0 -1 true true lines))))
-  (swap! buffer-sync-lines dissoc bufnum))
+   (catch :default e
+     (dbg "EXCEPTION" e e.stack))))
 
 (defn parinfer-indent
   [nvim args [[_ cursor-line cursor-x _] bufnum lines]]
   (let [start (js/Date.)]
-    (js/debug "from:" args bufnum)
     (if-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum)]
       (do
-       (js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
+       #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
        (clj->js new-lines))
       (do
-       (js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
+       #_(js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
        (clj->js [])))))
 
 (defn -main []
   (try
    (when (exists? js/plugin)
-     (js/debug "hello nvim")
+     (js/debug "hello parinfer")
      (.functionSync js/plugin "ParinferIndent"
                     #js {:eval "[getpos('.'), bufnr('.'), getline(1,line('$'))]"}
-                    parinfer-indent)
-     #_
-     (.command js/plugin "ParinferSyncLines" #js {:eval "bufnr('.')"} sync-lines)
-     #_
-     (.autocmd js/plugin "BufEnter"
-                   #js {:pattern "*.clj*,*.edn"
-                        :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
-                   format-buffer)
-     #_
-     (.autocmd js/plugin "TextChanged,TextChangedI"
-                   #js {:pattern "*.clj*,*.edn"
-                        :eval "[!exists('g:parinfer_mode') || g:parinfer_mode, getpos('.'), bufnr('.')]"}
-                   format-buffer))
-   (catch js/Error e
-     (dbg "main exception" e))))
+                    parinfer-indent))
+   (catch :default e
+     (dbg "main exception" e e.stack))))
 
 (set! *main-cli-fn* -main)
