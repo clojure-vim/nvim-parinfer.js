@@ -28,7 +28,9 @@ Plugin 'snoe/nvim-parinfer.js'
 
 ### Using it
 
-You can `let g:parinfer_mode 0` to turn off the plugin.
+You can `let g:parinfer_mode = "off"` to turn off the plugin.
+You can `let g:parinfer_mode = "indent"` to switch to indent-mode.
+You can `let g:parinfer_mode = "paren"` to switch to paren-mode.
 
 # Problems / troubleshooting
 

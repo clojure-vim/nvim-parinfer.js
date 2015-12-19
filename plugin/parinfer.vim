@@ -6,7 +6,7 @@ function! s:indent()
       silent undojoin
     catch
     endtry
-    let l:lines = ParinferIndent("changed")
+    let l:lines = ParinferIndent()
     if !empty(lines)
       call setline(1,lines)
     endif

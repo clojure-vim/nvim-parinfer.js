@@ -1,3 +1,8 @@
+#0.3.1
+- Added  paren-mode support (`let g:parinfer_mode = "paren"`).
+- Added airline modeline indicator.
+- You need to run `:UpdateRemotePlugins`.
+
 #0.3.0
 - Move to only running parinfer in node-host, put vimmy stuff like undojoin in `plugin/parinfer.vim`
 - You need to run `:UpdateRemotePlugins`.

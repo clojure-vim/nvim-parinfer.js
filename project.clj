@@ -1,4 +1,4 @@
-(defproject nvim-parinfer "0.3.0-SNAPSHOT"
+(defproject nvim-parinfer "0.3.1-SNAPSHOT"
   :description "A neovim parinfer plugin"
   :url "http://github.com/snoe/nvim-parinfer.js"
 
