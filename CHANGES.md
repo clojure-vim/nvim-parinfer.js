@@ -1,3 +1,6 @@
+#0.3.2
+- Updated for node-host api change, you need to update node-host plugin and `npm install --production` inside the bundle then `:UpdateRemotePlugins`
+
 #0.3.1
 - Added  paren-mode support (`let g:parinfer_mode = "paren"`).
 - Added airline modeline indicator.

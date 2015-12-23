@@ -109,15 +109,15 @@
      (dbg "EXCEPTION" e e.stack))))
 
 (defn parinfer-indent
-  [nvim args [[_ cursor-line cursor-x _] bufnum lines mode]]
+  [nvim args [[_ cursor-line cursor-x _] bufnum lines mode] nvim-callback]
   (let [start (js/Date.)]
     (if-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line buffer-results bufnum mode)]
       (do
        #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
-       (clj->js new-lines))
+       (nvim-callback nil (clj->js new-lines)))
       (do
        #_(js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
-       (clj->js [])))))
+       (nvim-callback nil (clj->js []))))))
 
 (defn -main []
   (try
