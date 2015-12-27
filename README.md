@@ -34,6 +34,10 @@ You can `let g:parinfer_mode = "indent"` to switch to indent-mode.
 
 You can `let g:parinfer_mode = "paren"` to switch to paren-mode.
 
+### Airline integration
+
+Parinfer mode (`indent` / `paren`) is displayed in airline by default, you can disable it with `let g:parinfer_airline_integration = 0`.
+
 # Problems / troubleshooting
 
 This does not seem to work well with paredit's insert mappings, I'd suggest turning it off `let g:paredit_mode = 0`
