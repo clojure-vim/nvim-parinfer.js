@@ -1,3 +1,6 @@
+#0.4.0
+- Updated to the lastest parinfer javascript api.
+
 #0.3.2
 - Updated for node-host api change, you need to update node-host plugin and `npm install --production` inside the bundle then `:UpdateRemotePlugins`
 
