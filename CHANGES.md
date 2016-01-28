@@ -1,3 +1,6 @@
+#0.4.1
+- fix airline guard
+
 #0.4.0
 - Updated to the lastest parinfer javascript api.
 
