@@ -1,5 +1,21 @@
 let g:parinfer_mode = "indent"
 
+function! s:indentparen()
+  if has('nvim') && g:parinfer_mode != "off"
+    try
+      silent undojoin
+    catch
+    endtry
+    let l:saved_mode = g:parinfer_mode
+    let g:parinfer_mode = "paren"
+    let l:lines = ParinferIndent()
+    let g:parinfer_mode = l:saved_mode
+    if !empty(lines)
+      call setline(1,lines)
+    endif
+  endif
+endfunction
+
 function! s:indent()
   if has('nvim') && g:parinfer_mode != "off"
     try
@@ -16,7 +32,7 @@ endfunction
 augroup ClojureParinfer
   autocmd FileType clojure
         \ :autocmd! ClojureParinfer BufEnter <buffer>
-        \ :call <SID>indent()
+        \ :call <SID>indentparen()
 
   autocmd FileType clojure
         \ :autocmd! ClojureParinfer TextChanged,TextChangedI <buffer>

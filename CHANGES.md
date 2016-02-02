@@ -1,3 +1,6 @@
+#0.4.2
+- run paren mode indent on bufenter
+
 #0.4.1
 - fix airline guard
 
