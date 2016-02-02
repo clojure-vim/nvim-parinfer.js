@@ -39,12 +39,15 @@ augroup ClojureParinfer
         \ :call <SID>indent()
 augroup END
 
-if (exists('g:loaded_airline') && g:loaded_airline && (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1))
+if (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1)
   function! ParinferAirline(...)
     if &filetype == "clojure"
       let w:airline_section_a = g:airline_section_a . ' %{g:parinfer_mode}'
     endif
   endfunction
 
-  call airline#add_statusline_func('ParinferAirline')
+  try
+    call airline#add_statusline_func('ParinferAirline')
+  catch
+  endtry
 endif

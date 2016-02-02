@@ -1,3 +1,6 @@
+#0.4.3
+- load airline status line in a safer way
+
 #0.4.2
 - run paren mode indent on bufenter
 
