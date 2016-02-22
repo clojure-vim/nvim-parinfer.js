@@ -9,7 +9,7 @@
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-npm "0.6.1"]]
 
-  :npm {:dependencies [[parinfer "1.4.0"]]}
+  :npm {:dependencies [[parinfer "1.6.1"]]}
 
   :clean-targets ["rplugin/node/nvim-parinfer" "rplugin/node/nvim-parinfer.js"]
 
