@@ -40,10 +40,10 @@
     (if-let [new-lines (format-lines lines cursor-x cursor-line bufnum mode)]
       (do
        #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
-       (nvim-callback nil (clj->js new-lines)))
+       (nvim-callback nil new-lines))
       (do
        #_(js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
-       (nvim-callback nil (clj->js []))))))
+       (nvim-callback nil #js [])))))
 
 (defn -main []
   (try
