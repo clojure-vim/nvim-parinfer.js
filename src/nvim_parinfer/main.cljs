@@ -1,8 +1,6 @@
 (ns nvim-parinfer.main
   (:require
-   [parinfer :as parinfer]
-   [clojure.data :as cd]
-   [clojure.string :as string]))
+   [parinfer :as parinfer]))
 
 (defn dbg
   [msg & args]
@@ -13,7 +11,7 @@
 
 (defn split-lines [s]
   (when s
-    (string/split s #"\r?\n" -1)))
+    (.split s #"\r?\n")))
 
 (defn run-indent [current-text opts mode]
   (cond
@@ -25,10 +23,10 @@
 
 (defn format-lines [current-lines cursor-x cursor-line bufnum mode]
   (try
-   (let [opts (clj->js {"cursorX" (dec cursor-x) "cursorLine" (dec cursor-line)})
-         current-text (string/join "\n" current-lines)
-         result (js->clj (run-indent current-text opts mode))
-         new-text (get result "text")]
+   (let [opts #js {"cursorX" (dec cursor-x) "cursorLine" (dec cursor-line)}
+         current-text (.join current-lines "\n")
+         result (run-indent current-text opts mode)
+         new-text (.-text result)]
 
     (when (not= current-text new-text)
      (split-lines new-text)))
@@ -39,13 +37,13 @@
 (defn parinfer-indent
   [nvim args [[_ cursor-line cursor-x _] bufnum lines mode] nvim-callback]
   (let [start (js/Date.)]
-    (if-let [new-lines (format-lines (js->clj lines) cursor-x cursor-line bufnum mode)]
+    (if-let [new-lines (format-lines lines cursor-x cursor-line bufnum mode)]
       (do
        #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
-       (nvim-callback nil (clj->js new-lines)))
+       (nvim-callback nil new-lines))
       (do
        #_(js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
-       (nvim-callback nil (clj->js []))))))
+       (nvim-callback nil #js [])))))
 
 (defn -main []
   (try
