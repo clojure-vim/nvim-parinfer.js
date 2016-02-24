@@ -1,3 +1,6 @@
+#0.4.4
+- speed improvements (courtesy https://github.com/djwhitt)
+
 #0.4.3
 - load airline status line in a safer way
 
