@@ -11,6 +11,21 @@ https://shaunlebron.github.io/parinfer
 [Install latest neovim](https://github.com/neovim/neovim/wiki/Installing-Neovim)
 
 [Install node-host](https://github.com/neovim/node-host)
+### VIM-PLUG
+Using Vim-Plug, add this to your vim-plug .config/nvim/init.vim section:
+```
+Plug 'snoe/nvim-parinfer.js', {'for': 'clojure', 'do': 'lein do npm install, cljsbuild once'}
+```
+Then inside à terminal (in /.config/nvim)
+```
+cp plugged/nvim-parinfer.js/rplugin/node/nvim-parinfer.js rplugin/node/nvim-parinfer.js
+```
+#### Inside nvim
+- `:PlugInstall`
+- `:UpdateRemotePlugins` you should see `remote/host: node host registered plugins ['nvim-parinfer.js']` 
+- *restart* nvim
+- infer pars
+
 
 ### Vundle
 
@@ -20,7 +35,7 @@ Using Vundle, add this to your vundle .config/nvim/init.vim section:
 Plugin 'snoe/nvim-parinfer.js'
 ```
 
-### Inside nvim
+#### Inside nvim
 - `:PluginInstall`
 - `:UpdateRemotePlugins` you should see `remote/host: node host registered plugins ['nvim-parinfer.js']` 
 - *restart* nvim
