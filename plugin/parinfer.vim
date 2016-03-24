@@ -1,4 +1,6 @@
-let g:parinfer_mode = "indent"
+if !exists('g:parinfer_mode')
+  let g:parinfer_mode = "indent"
+endif
 
 function! s:indentparen()
   if has('nvim') && g:parinfer_mode != "off"
