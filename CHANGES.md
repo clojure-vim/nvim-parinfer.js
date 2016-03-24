@@ -1,3 +1,7 @@
+#0.4.5
+- load for scheme, lisp, and racket filetypes
+- introduce hybrid mode - use at own risk
+
 #0.4.4
 - speed improvements (courtesy https://github.com/djwhitt)
 

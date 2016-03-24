@@ -31,19 +31,19 @@ function! s:indent()
   endif
 endfunction
 
-augroup ClojureParinfer
-  autocmd FileType clojure
-        \ :autocmd! ClojureParinfer BufEnter <buffer>
+augroup Parinfer
+  autocmd FileType clojure,scheme,lisp,racket
+        \ :autocmd! Parinfer BufEnter <buffer>
         \ :call <SID>indentparen()
 
-  autocmd FileType clojure
-        \ :autocmd! ClojureParinfer TextChanged,TextChangedI <buffer>
+  autocmd FileType clojure,scheme,lisp,racket
+        \ :autocmd! Parinfer TextChanged,TextChangedI <buffer>
         \ :call <SID>indent()
 augroup END
 
 if (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1)
   function! ParinferAirline(...)
-    if &filetype == "clojure"
+    if &filetype =~ '.*\(clojure\|scheme\|lisp\|racket\).*'
       let w:airline_section_a = g:airline_section_a . ' %{g:parinfer_mode}'
     endif
   endfunction
