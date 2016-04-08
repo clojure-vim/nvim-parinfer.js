@@ -1,3 +1,7 @@
+#0.5.0
+- Upgrade to parinfer 1.8.0
+- Add indent and dedent mappings based on parinfer tabStops
+
 #0.4.5
 - load for scheme, lisp, and racket filetypes
 - introduce hybrid mode - use at own risk

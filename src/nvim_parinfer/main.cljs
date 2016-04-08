@@ -54,13 +54,46 @@
        #_(js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
        (nvim-callback nil #js [])))))
 
+(defn shift-command [startline endline shift-amount shift-op]
+  (str "let l:oldsw=&shiftwidth"
+       "|set shiftwidth=" shift-amount
+       "|exe \"" shift-op "\""
+       "|let &shiftwidth=l:oldsw"))
+
+(defn parinfer-shift
+  [nvim [shift-op startline endline] [lines] nvim-callback]
+  (let [result (run-indent (.join lines "\n")
+                           #js {"cursorX" 0 "cursorLine" (dec startline)}
+                           "indent"
+                           nil)
+        tab-stops (aget result "tabStops")
+        first-line (get lines (dec startline))
+        first-char (.search first-line #"\S")
+        stops (sort (cons 0 (map (fn [ts] (inc (aget ts "x"))) tab-stops)))]
+    (if-let [dynamic-shift-op
+             (if (string/includes? shift-op "<")
+               (when-let [prev-stop (last (filter (partial > first-char) stops))]
+                 (shift-command startline endline (- first-char prev-stop) shift-op))
+               (when-let [next-stop (first (filter (partial < first-char) stops))]
+                 (shift-command startline endline (- next-stop first-char) shift-op)))]
+      (.command nvim dynamic-shift-op
+                (fn [& args]
+                  (nvim-callback nil true)))
+      (.command nvim shift-op
+                (fn [& args]
+                  (nvim-callback nil true))))))
+
 (defn -main []
   (try
    (when (exists? js/plugin)
      (js/debug "hello parinfer")
      (.functionSync js/plugin "ParinferIndent"
                     #js {:eval "[getpos('.'), bufnr('.'), getline(1,line('$')), g:parinfer_mode]"}
-                    parinfer-indent))
+                    parinfer-indent)
+     (.functionSync js/plugin "ParinferShift"
+                   #js {:eval "[getline(1,line('$'))]"}
+                   parinfer-shift))
+
    (catch :default e
      (dbg "main exception" e e.stack))))
 

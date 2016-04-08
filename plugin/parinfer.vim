@@ -2,6 +2,11 @@ if !exists('g:parinfer_mode')
   let g:parinfer_mode = "indent"
 endif
 
+try
+  silent! call repeat#set('')
+catch
+endtry
+
 function! s:indentparen()
   if has('nvim') && g:parinfer_mode != "off"
     try
@@ -31,6 +36,40 @@ function! s:indent()
   endif
 endfunction
 
+function! s:parinferShiftCmd(vis, left) range
+  if a:vis && a:left
+    let l:shift_op = "norm! gv<"
+  elseif a:vis
+    let l:shift_op = "norm! gv>"
+  elseif a:left
+    let l:shift_op = a:firstline.",".a:lastline."norm! <<"
+  else
+    let l:shift_op = a:firstline.",".a:lastline."norm! >>"
+  endif
+
+  call ParinferShift(l:shift_op, a:firstline, a:lastline)
+endfunction
+
+function! s:repeat(name, count)
+  if exists('*repeat#set')
+    call repeat#set(a:name, a:count)
+  endif
+endfunction
+
+noremap <silent> <Plug>ParinferShiftVisLeft
+      \ :call <SID>parinferShiftCmd(1, 1)<CR>
+      \ :call <SID>repeat("\<Plug>ParinferShiftVisLeft", v:count)<CR>
+noremap <silent> <Plug>ParinferShiftVisRight
+      \ :call <SID>parinferShiftCmd(1, 0)<CR>
+      \ :call <SID>repeat("\<Plug>ParinferShiftVisRight", v:count)<CR>
+
+noremap <silent> <Plug>ParinferShiftNormLeft
+      \ :call <SID>parinferShiftCmd(0, 1)<CR>
+      \ :call <SID>repeat("\<Plug>ParinferShiftNormLeft", v:count)<CR>
+noremap <silent> <Plug>ParinferShiftNormRight
+      \ :call <SID>parinferShiftCmd(0, 0)<CR>
+      \ :call <SID>repeat("\<Plug>ParinferShiftNormRight", v:count)<CR>
+
 augroup Parinfer
   autocmd FileType clojure,scheme,lisp,racket
         \ :autocmd! Parinfer BufEnter <buffer>
@@ -39,6 +78,11 @@ augroup Parinfer
   autocmd FileType clojure,scheme,lisp,racket
         \ :autocmd! Parinfer TextChanged,TextChangedI <buffer>
         \ :call <SID>indent()
+
+  autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> >  <Plug>ParinferShiftVisRight
+  autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> <  <Plug>ParinferShiftVisLeft
+  autocmd FileType clojure,scheme,lisp,racket :nmap <buffer> >> <Plug>ParinferShiftNormRight
+  autocmd FileType clojure,scheme,lisp,racket :nmap <buffer> << <Plug>ParinferShiftNormLeft
 augroup END
 
 if (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1)

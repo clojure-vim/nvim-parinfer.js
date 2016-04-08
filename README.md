@@ -34,6 +34,8 @@ You can `let g:parinfer_mode = "indent"` to switch to indent-mode.
 
 You can `let g:parinfer_mode = "paren"` to switch to paren-mode.
 
+Indent (`>>`) and dedent (`<<`) mappings have been made to dynamically align elements to tabstops that will change the structure of the code.
+
 ### Airline integration
 
 Parinfer mode (`indent` / `paren`) is displayed in airline by default, you can disable it with `let g:parinfer_airline_integration = 0`.
