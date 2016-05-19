@@ -2,6 +2,10 @@ if !exists('g:parinfer_mode')
   let g:parinfer_mode = "indent"
 endif
 
+if !exists('g:parinfer_preview_cursor_scope')
+  let g:parinfer_preview_cursor_scope = 0
+endif
+
 try
   silent! call repeat#set('')
 catch

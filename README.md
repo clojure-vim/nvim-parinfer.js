@@ -36,6 +36,25 @@ You can `let g:parinfer_mode = "paren"` to switch to paren-mode.
 
 Indent (`>>`) and dedent (`<<`) mappings have been made to dynamically align elements to tabstops that will change the structure of the code.
 
+You can enable Parinfers previewCursorScope option with `let g:parinfer_preview_cursor_scope = 1` (default is 0)
+
+  previewCursorScope off `let g:parinfer_preview_cursor_scope = 0`:
+
+  ```clj
+  (let [foo 1
+        bar 2]
+        |
+    (+ foo bar))
+  ```
+
+  previewCursorScope on `let g:parinfer_preview_cursor_scope = 1`:
+
+  ```clj
+  (let [foo 1
+        bar 2
+        |]
+    (+ foo bar))
+  ```
 ### Airline integration
 
 Parinfer mode (`indent` / `paren`) is displayed in airline by default, you can disable it with `let g:parinfer_airline_integration = 0`.
