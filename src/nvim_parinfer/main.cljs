@@ -101,4 +101,3 @@
      (dbg "main exception" e e.stack))))
 
 (set! *main-cli-fn* -main)
-(set! *main-cli-fn* -main)
