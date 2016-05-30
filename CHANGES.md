@@ -1,3 +1,7 @@
+#0.5.1
+- Upgrade to parinfer 1.8.1
+- Added previewCursorScope option (thanks MaxSt!)
+
 #0.5.0
 - Upgrade to parinfer 1.8.0
 - Add indent and dedent mappings based on parinfer tabStops
