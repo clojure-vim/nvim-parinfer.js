@@ -1,7 +1,7 @@
 (ns nvim-parinfer.main
-  (:require
-   [clojure.string :as string]
-   [parinfer :as parinfer]))
+ (:require
+  [clojure.string :as string]
+  [parinfer :as parinfer]))
 
 (defn dbg
   [msg & args]
@@ -51,7 +51,7 @@
 (defn parinfer-indent
   [nvim args [[_ cursor-line cursor-x _] bufnum lines mode prev-cursor-scope normal-cmd reg-minus] nvim-callback]
   (let [start (js/Date.)
-        cursor-dx (if (string/includes? "cd" normal-cmd) reg-minus 1)]
+        cursor-dx (if (string/includes? "cd" normal-cmd) reg-minus 0)]
     (if-let [new-lines (format-lines lines cursor-x cursor-line bufnum mode prev-cursor-scope cursor-dx)]
       (do
        #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
