@@ -1,3 +1,7 @@
+#0.5.2
+- cursorDX support (thanks MaxSt)
+- You need to run `:UpdateRemotePlugins`
+
 #0.5.1
 - Upgrade to parinfer 1.8.1
 - Added previewCursorScope option (thanks MaxSt!)
