@@ -1,7 +1,7 @@
 (ns nvim-parinfer.main
-  (:require
-   [clojure.string :as string]
-   [parinfer :as parinfer]))
+ (:require
+  [clojure.string :as string]
+  [parinfer :as parinfer]))
 
 (defn dbg
   [msg & args]
@@ -31,10 +31,12 @@
      (let [paren (parinfer/parenMode current-text opts)]
        (parinfer/indentMode (.-text paren) opts)))))
 
-(defn format-lines [current-lines cursor-x cursor-line bufnum mode prev-cursor-scope]
+(defn format-lines [current-lines cursor-x cursor-line bufnum mode prev-cursor-scope cursor-dx]
   (try
    (let [opts (clj->js (merge
-                        {"cursorX" (dec cursor-x) "cursorLine" (dec cursor-line)}
+                        {"cursorX" (dec cursor-x)
+                         "cursorLine" (dec cursor-line)
+                         "cursorDx" cursor-dx}
                         (when (= 1 prev-cursor-scope)
                             {"previewCursorScope" true})))
          current-text (.join current-lines "\n")
@@ -47,9 +49,10 @@
      (dbg "EXCEPTION" e e.stack))))
 
 (defn parinfer-indent
-  [nvim args [[_ cursor-line cursor-x _] bufnum lines mode prev-cursor-scope] nvim-callback]
-  (let [start (js/Date.)]
-    (if-let [new-lines (format-lines lines cursor-x cursor-line bufnum mode prev-cursor-scope)]
+  [nvim args [[_ cursor-line cursor-x _] bufnum lines mode prev-cursor-scope normal-cmd reg-minus] nvim-callback]
+  (let [start (js/Date.)
+        cursor-dx (if (string/includes? "cd" normal-cmd) reg-minus 0)]
+    (if-let [new-lines (format-lines lines cursor-x cursor-line bufnum mode prev-cursor-scope cursor-dx)]
       (do
        #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
        (nvim-callback nil new-lines))
@@ -91,7 +94,7 @@
    (when (exists? js/plugin)
      (js/debug "hello parinfer")
      (.functionSync js/plugin "ParinferIndent"
-                    #js {:eval "[getpos('.'), bufnr('.'), getline(1,line('$')), g:parinfer_mode, g:parinfer_preview_cursor_scope]"}
+                    #js {:eval "[getpos('.'), bufnr('.'), getline(1,line('$')), g:parinfer_mode, g:parinfer_preview_cursor_scope, v:operator, -strlen(@-)]"}
                     parinfer-indent)
      (.functionSync js/plugin "ParinferShift"
                    #js {:eval "[getline(1,line('$'))]"}
