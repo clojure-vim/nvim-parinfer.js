@@ -1,3 +1,6 @@
+#0.5.3
+- fix initial load using cursorDX (thanks eraserhd)
+
 #0.5.2
 - cursorDX support (thanks MaxSt)
 - You need to run `:UpdateRemotePlugins`
