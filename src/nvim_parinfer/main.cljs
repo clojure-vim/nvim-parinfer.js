@@ -1,6 +1,7 @@
 (ns nvim-parinfer.main
  (:require
   [clojure.string :as string]
+  [nvim-parinfer.core :as core]
   [parinfer :as parinfer]))
 
 (defn dbg
@@ -93,13 +94,16 @@
   (try
    (when (exists? js/plugin)
      (js/debug "hello parinfer")
-     (.functionSync js/plugin "ParinferIndent"
-                    #js {:eval "[getpos('.'), getline(1,line('$')), g:parinfer_mode, g:parinfer_preview_cursor_scope, v:operator, -strlen(@-)]"}
-                    parinfer-indent)
-     (.functionSync js/plugin "ParinferShift"
-                   #js {:eval "[getline(1,line('$'))]"}
-                   parinfer-shift))
-
+     (doto js/plugin
+      (.functionSync "ParinferIndent"
+                     #js {:eval "[getpos('.'), getline(1,line('$')), g:parinfer_mode, g:parinfer_preview_cursor_scope, v:operator, -strlen(@-)]"}
+                     parinfer-indent)
+      (.functionSync "ParinferShift"
+                    #js {:eval "[getline(1,line('$'))]"}
+                    parinfer-shift)
+      (.functionSync "ParinferTextChangedHandler"
+                     (fn [nvim [event] nvim-callback]
+                       (nvim-callback nil (core/text-changed event))))))
    (catch :default e
      (dbg "main exception" e e.stack))))
 

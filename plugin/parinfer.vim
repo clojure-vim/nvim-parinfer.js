@@ -60,6 +60,18 @@ function! s:repeat(name, count)
   endif
 endfunction
 
+function! s:process(event)
+  let l:position = getpos('.')
+  let l:event = { "event": a:event,
+                \ "position": [l:position[1] - 1, l:position[2] - 1],
+                \ "lines": getline(1,line('$')),
+                \ "parinfer_mode": g:parinfer_mode,
+                \ "parinfer_preview_cursor_scope": g:parinfer_preview_cursor_scope }
+  let l:result = ParinferTextChangedHandler(l:event)
+  call setline(1, l:result["lines"])
+  call cursor(l:result["position"][0] + 1, l:result["position"][1] + 1)
+endfunction
+
 noremap <silent> <Plug>ParinferShiftVisLeft
       \ :call <SID>parinferShiftCmd(1, 1)<CR>
       \ :call <SID>repeat("\<Plug>ParinferShiftVisLeft", v:count)<CR>
@@ -80,8 +92,11 @@ augroup Parinfer
         \ :call <SID>indentparen()
 
   autocmd FileType clojure,scheme,lisp,racket
-        \ :autocmd! Parinfer TextChanged,TextChangedI <buffer>
-        \ :call <SID>indent()
+        \ :autocmd! Parinfer TextChanged <buffer>
+        \ :call <SID>process("TextChanged")
+  autocmd FileType clojure,scheme,lisp,racket
+        \ :autocmd! Parinfer TextChangedI <buffer>
+        \ :call <SID>process("TextChangedI")
 
   autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> >  <Plug>ParinferShiftVisRight
   autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> <  <Plug>ParinferShiftVisLeft
