@@ -15,10 +15,10 @@
      :cursorX (aget result "cursorX")}))
 
 (defn text-changed
-  [{:keys [lines]
-    [cursorLine cursorX] :cursor
+  [{[cursorLine cursorX] :cursor
     :as event}]
-  (let [previewCursorScope? (some-> event
+  (let [lines (get event "lines")
+        previewCursorScope? (some-> event
                               (get "parinfer_preview_cursor_scope")
                               pos?)
         result (reindent
@@ -28,5 +28,5 @@
                   :cursorLine cursorLine
                   :previewCursorScope previewCursorScope?})]
     (-> event
-      (assoc :lines (string/split (:text result) #"\n"))
+      (assoc "lines" (string/split (:text result) #"\n"))
       (assoc-in [:cursor 1] (:cursorX result)))))
