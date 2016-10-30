@@ -3,8 +3,7 @@
   :url "http://github.com/snoe/nvim-parinfer.js"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.40"]
-                 [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]]
+                 [org.clojure/clojurescript "1.8.40"]]
 
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-npm "0.6.1"]]
