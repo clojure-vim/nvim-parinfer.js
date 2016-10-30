@@ -9,14 +9,13 @@
     (apply js/console.log msg (map pr-str args)))
   (first args))
 
-(def ^:private parinfer-mode-fn
-  {"indent" parinfer/indentMode
-   "paren" parinfer/parenMode})
-
-(defn- reindent
-  "Wrapper for *Mode, translating to/from JS structures."
-  [mode text options]
-  ((parinfer-mode-fn mode) text options))
+(defn- wrap-debug-log
+  [f]
+  (fn [event]
+    (dbg "received event:" event)
+    (let [result (f event)]
+      (dbg "responding with:" result)
+      result)))
 
 (defn- vim-dict->map
   "js->clj doesn't want to translate Vim dictionaries for us, so we force
@@ -32,6 +31,15 @@
       vim-dict->map
       f
       clj->js)))
+
+(def ^:private parinfer-mode-fn
+  {"indent" parinfer/indentMode
+   "paren" parinfer/parenMode})
+
+(defn- reindent
+  "Wrapper for *Mode, translating to/from JS structures."
+  [mode text options]
+  ((parinfer-mode-fn mode) text options))
 
 (defn- process-reindent
   [event]
@@ -56,4 +64,5 @@
 
 (def process
   (-> process-reindent
+    wrap-debug-log
     wrap-vim-interop))
