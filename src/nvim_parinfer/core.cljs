@@ -25,11 +25,17 @@
   (into {} (for [k (.keys js/Object x)]
              [k (js->clj (aget x k))])))
 
-(defn process
+(defn- wrap-vim-interop
+  [f]
+  (fn [event]
+    (-> event
+      vim-dict->map
+      f
+      clj->js)))
+
+(defn- process-reindent
   [event]
-  (let [event (vim-dict->map event)
-        _ (dbg "got event:" event)
-        event-type (get event "event")
+  (let [event-type (get event "event")
         mode (if (= event-type "BufEnter")
                "paren"
                (get event "mode"))
@@ -46,5 +52,8 @@
                       "previewCursorScope" previewCursorScope?})]
     (-> event
       (assoc "lines" (string/split (aget result "text") #"\n"))
-      (assoc-in ["position" 2] (aget result "cursorX"))
-      clj->js)))
+      (assoc-in ["position" 2] (aget result "cursorX")))))
+
+(def process
+  (-> process-reindent
+    wrap-vim-interop))
