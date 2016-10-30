@@ -6,20 +6,20 @@
   (is (= (-> (text-changed
               {:cursor [0 0]
                :lines ["(a" "(b)"]
-               :mode "indent"})
+               "parinfer_mode" "indent"})
            :lines)
          ["(a)" "(b)"]))
   (testing ":preview-cursor-scope"
     (let [result (text-changed
                     {:cursor [1 4]
                      :lines ["(a [a" "   "]
-                     :mode "indent"
+                     "parinfer_mode" "indent"
                      :preview-cursor-scope false})]
       (is (= (:lines result) ["(a [a])" "   "])))
     (let [result (text-changed
                    {:cursor [1 4]
                     :lines ["(a [a" "    "]
-                    :mode "indent"
+                    "parinfer_mode" "indent"
                     :preview-cursor-scope true})]
       (is (= (:lines result) ["(a [a" "    ])"]))
       (is (= (:cursor result) [1 4])))))
@@ -28,7 +28,7 @@
   (let [result (text-changed
                 {:cursor [1 1]
                  :lines ["(a" "b)"]
-                 :mode "paren"})]
+                 "parinfer_mode" "paren"})]
     (is (= (:lines result) ["(a" " b)"]))
     (is (= (:cursor result) [1 2]))))
 
@@ -36,6 +36,6 @@
   (let [result (text-changed
                  {:cursor [0 3]
                   :lines [")(}}]["]
-                  :mode "paren"})]
+                  "parinfer_mode" "paren"})]
     (is (= (:lines result) [")(}}]["]))
     (is (= (:cursor result) [0 3]))))

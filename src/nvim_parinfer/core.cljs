@@ -15,11 +15,11 @@
      :cursorX (aget result "cursorX")}))
 
 (defn text-changed
-  [{:keys [lines mode preview-cursor-scope]
+  [{:keys [lines preview-cursor-scope]
     [cursorLine cursorX] :cursor
     :as event}]
   (let [result (reindent
-                 mode
+                 (get event "parinfer_mode")
                  (string/join "\n" lines)
                  {:cursorX cursorX
                   :cursorLine cursorLine
