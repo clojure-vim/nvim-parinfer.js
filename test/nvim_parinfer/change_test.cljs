@@ -17,3 +17,11 @@
                  :mode "paren"})]
     (is (= (:lines result) ["(a" " b)"]))
     (is (= (:cursor result) [1 2]))))
+
+(deftest t-handles-failure
+  (let [result (text-changed
+                 {:cursor [0 3]
+                  :lines [")(}}]["]
+                  :mode "paren"})]
+    (is (= (:lines result) [")(}}]["]))
+    (is (= (:cursor result) [0 3]))))
