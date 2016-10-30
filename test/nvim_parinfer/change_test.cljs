@@ -4,18 +4,16 @@
 
 (deftest t-handles-indent-mode
   (is (= (-> (text-changed
-              {:parinfer/event "TextChanged"
-               :parinfer/cursor [0 0]
-               :parinfer/lines ["(a" "(b)"]
-               :parinfer/mode "indent"})
-           :parinfer/lines)
+              {:cursor [0 0]
+               :lines ["(a" "(b)"]
+               :mode "indent"})
+           :lines)
          ["(a)" "(b)"])))
          
 (deftest t-handles-paren-mode
-  (is (= (-> (text-changed
-              {:parinfer/event "TextChanged"
-               :parinfer/cursor [0 0]
-               :parinfer/lines ["(a" "b)"]
-               :parinfer/mode "paren"})
-           :parinfer/lines)
-         ["(a" " b)"])))
+  (let [result (text-changed
+                {:cursor [1 1]
+                 :lines ["(a" "b)"]
+                 :mode "paren"})]
+    (is (= (:lines result) ["(a" " b)"]))
+    (is (= (:cursor result) [1 2]))))

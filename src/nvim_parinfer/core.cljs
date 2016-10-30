@@ -7,7 +7,7 @@
    "paren" parinfer/parenMode})
 
 (defn- reindent
-  "Wrapper for parinfer/*Mode, translating to/from JS structures."
+  "Wrapper for *Mode, translating to/from JS structures."
   [mode text options]
   (let [options (clj->js options)
         result ((parinfer-mode-fn mode) text options)]
@@ -16,12 +16,14 @@
      :cursorX (aget result "cursorX")}))
 
 (defn text-changed
-  [{:keys [:parinfer/lines :parinfer/mode]
-    [cursorLine cursorX] :parinfer/cursor
+  [{:keys [:lines :mode]
+    [cursorLine cursorX] :cursor
     :as event}]
   (let [result (reindent
                  mode
                  (string/join "\n" lines)
                  {:cursorX cursorX
                   :cursorLine cursorLine})]
-    (assoc event :parinfer/lines (string/split (:text result) #"\n"))))
+    (-> event
+      (assoc :lines (string/split (:text result) #"\n"))
+      (assoc-in [:cursor 1] (:cursorX result)))))
