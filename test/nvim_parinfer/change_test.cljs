@@ -13,21 +13,21 @@
   (is (= (-> (result-of
               {"position" [0 0]
                "lines" ["(a" "(b)"]
-               "parinfer_mode" "indent"})
+               "mode" "indent"})
            (get "lines"))
          ["(a)" "(b)"]))
-  (testing "g:parinfer_preview_cursor_scope"
+  (testing "g:preview_cursor_scope"
     (let [result (result-of
                     {"position" [1 4]
                      "lines" ["(a [a" "   "]
-                     "parinfer_mode" "indent"
-                     "parinfer_preview_cursor_scope" 0})]
+                     "mode" "indent"
+                     "preview_cursor_scope" 0})]
       (is (= (get result "lines") ["(a [a])" "   "])))
     (let [result (result-of
                    {"position" [1 4]
                     "lines" ["(a [a" "    "]
-                    "parinfer_mode" "indent"
-                    "parinfer_preview_cursor_scope" 1})]
+                    "mode" "indent"
+                    "preview_cursor_scope" 1})]
       (is (= (get result "lines") ["(a [a" "    ])"]))
       (is (= (get result "position") [1 4])))))
          
@@ -35,7 +35,7 @@
   (let [result (result-of
                 {"position" [1 1]
                  "lines" ["(a" "b)"]
-                 "parinfer_mode" "paren"})]
+                 "mode" "paren"})]
     (is (= (get result "lines") ["(a" " b)"]))
     (is (= (get result "position") [1 2]))))
 
@@ -43,6 +43,6 @@
   (let [result (result-of
                  {"position" [0 3]
                   "lines" [")(}}]["]
-                  "parinfer_mode" "paren"})]
+                  "mode" "paren"})]
     (is (= (get result "lines") [")(}}]["]))
     (is (= (get result "position") [0 3]))))

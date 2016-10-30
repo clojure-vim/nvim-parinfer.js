@@ -65,8 +65,8 @@ function! s:process(event)
   let l:event = { "event": a:event,
                 \ "position": [l:position[1] - 1, l:position[2] - 1],
                 \ "lines": getline(1,line('$')),
-                \ "parinfer_mode": g:parinfer_mode,
-                \ "parinfer_preview_cursor_scope": g:parinfer_preview_cursor_scope }
+                \ "mode": g:parinfer_mode,
+                \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
   let l:result = ParinferTextChangedHandler(l:event)
   call setline(1, l:result["lines"])
   call cursor(l:result["position"][0] + 1, l:result["position"][1] + 1)

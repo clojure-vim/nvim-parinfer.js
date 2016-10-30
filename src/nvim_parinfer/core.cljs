@@ -11,7 +11,7 @@
   [mode text options]
   ((parinfer-mode-fn mode) text options))
 
-(defn- as-map
+(defn- vim-dict->map
   "js->clj doesn't want to translate Vim dictionaries for us, so we force
   the issue."
   [x]
@@ -20,14 +20,14 @@
 
 (defn text-changed
   [event]
-  (let [event (as-map event)
+  (let [event (vim-dict->map event)
         [cursorLine cursorX] (get event "position")
         lines (get event "lines")
         previewCursorScope? (some-> event
-                              (get "parinfer_preview_cursor_scope")
+                              (get "preview_cursor_scope")
                               pos?)
         result (reindent
-                (get event "parinfer_mode")
+                (get event "mode")
                 (string/join "\n" lines)
                 #js {"cursorX" cursorX
                      "cursorLine" cursorLine
