@@ -4,16 +4,9 @@
   [nvim-parinfer.core :as core]
   [parinfer :as parinfer]))
 
-(defn dbg
-  [msg & args]
-  (if (exists? js/debug)
-    (apply js/debug msg (map pr-str args))
-    (apply js/console.log msg (map pr-str args)))
-  (first args))
-
 (defn split-lines [s]
-  (when s
-    (.split s #"\r?\n")))
+ (when s
+   (.split s #"\r?\n")))
 
 (defn new-line? [current-line]
   (re-matches #"\s*\S$" current-line))
@@ -31,35 +24,6 @@
      (parinfer/indentMode current-text opts)
      (let [paren (parinfer/parenMode current-text opts)]
        (parinfer/indentMode (.-text paren) opts)))))
-
-(defn format-lines [current-lines cursor-x cursor-line mode prev-cursor-scope cursor-dx]
-  (try
-   (let [opts (clj->js (merge
-                        {"cursorX" (dec cursor-x)
-                         "cursorLine" (dec cursor-line)
-                         "cursorDx" cursor-dx}
-                        (when (= 1 prev-cursor-scope)
-                           {"previewCursorScope" true})))
-         current-text (.join current-lines "\n")
-         result (run-indent current-text opts mode (get current-lines (dec cursor-line)))
-         new-text (.-text result)]
-    (when (not= current-text new-text)
-     (split-lines new-text)))
-
-   (catch :default e
-     (dbg "EXCEPTION" e e.stack))))
-
-(defn parinfer-indent
-  [nvim args [[_ cursor-line cursor-x _] lines mode prev-cursor-scope normal-cmd reg-minus] nvim-callback]
-  (let [start (js/Date.)
-        cursor-dx (if (#{"c" "d"} normal-cmd) reg-minus 0)]
-    (if-let [new-lines (format-lines lines cursor-x cursor-line mode prev-cursor-scope cursor-dx)]
-      (do
-       #_(js/debug "c" (- (.getTime (js/Date.)) (.getTime start)))
-       (nvim-callback nil new-lines))
-      (do
-       #_(js/debug "n" (- (.getTime (js/Date.)) (.getTime start)))
-       (nvim-callback nil #js [])))))
 
 (defn shift-command [startline endline shift-amount shift-op]
   (str "let l:oldsw=&shiftwidth"
@@ -95,9 +59,6 @@
    (when (exists? js/plugin)
      (js/debug "hello parinfer")
      (doto js/plugin
-      (.functionSync "ParinferIndent"
-                     #js {:eval "[getpos('.'), getline(1,line('$')), g:parinfer_mode, g:parinfer_preview_cursor_scope, v:operator, -strlen(@-)]"}
-                     parinfer-indent)
       (.functionSync "ParinferShift"
                     #js {:eval "[getline(1,line('$'))]"}
                     parinfer-shift)
@@ -105,6 +66,6 @@
                      (fn [nvim [event] nvim-callback]
                        (nvim-callback nil (core/process event))))))
    (catch :default e
-     (dbg "main exception" e e.stack))))
+     (core/dbg "main exception" e e.stack))))
 
 (set! *main-cli-fn* -main)

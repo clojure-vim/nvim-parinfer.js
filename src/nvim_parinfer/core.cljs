@@ -2,6 +2,13 @@
   (:require [clojure.string :as string]
             [parinfer :as parinfer]))
 
+(defn dbg
+  [msg & args]
+  (if (exists? js/debug)
+    (apply js/debug msg (map pr-str args))
+    (apply js/console.log msg (map pr-str args)))
+  (first args))
+
 (def ^:private parinfer-mode-fn
   {"indent" parinfer/indentMode
    "paren" parinfer/parenMode})
@@ -21,17 +28,22 @@
 (defn process
   [event]
   (let [event (vim-dict->map event)
+        _ (dbg "got event:" event)
+        event-type (get event "event")
+        mode (if (= event-type "BufEnter")
+               "paren"
+               (get event "mode"))
         [_ cursorLine cursorX _] (get event "position")
         lines (get event "lines")
         previewCursorScope? (some-> event
                               (get "preview_cursor_scope")
                               pos?)
         result (reindent
-                (get event "mode")
-                (string/join "\n" lines)
-                #js {"cursorX" cursorX
-                     "cursorLine" cursorLine
-                     "previewCursorScope" previewCursorScope?})]
+                 mode
+                 (string/join "\n" lines)
+                 #js {"cursorX" cursorX
+                      "cursorLine" cursorLine
+                      "previewCursorScope" previewCursorScope?})]
     (-> event
       (assoc "lines" (string/split (aget result "text") #"\n"))
       (assoc-in ["position" 2] (aget result "cursorX"))

@@ -24,12 +24,12 @@
                      "preview_cursor_scope" 0})]
       (is (= (get result "lines") ["(a [a])" "   "])))
     (let [result (result-of
-                   {"position" [0 1 4 0]
-                    "lines" ["(a [a" "    "]
-                    "mode" "indent"
-                    "preview_cursor_scope" 1})]
-      (is (= (get result "lines") ["(a [a" "    ])"]))
-      (is (= (get result "position") [0 1 4 0])))))
+                  {"position" [0 1 4 0]
+                   "lines" ["(a [a" "    "]
+                   "mode" "indent"
+                   "preview_cursor_scope" 1})]
+     (is (= (get result "lines") ["(a [a" "    ])"]))
+     (is (= (get result "position") [0 1 4 0])))))
          
 (deftest t-handles-paren-mode
   (let [result (result-of
@@ -46,3 +46,11 @@
                   "mode" "paren"})]
     (is (= (get result "lines") [")(}}]["]))
     (is (= (get result "position") [0 0 3 0]))))
+
+(deftest t-enter-always-uses-paren-mode
+  (let [result (result-of
+                {"event" "BufEnter"
+                 "position" [0 1 1 0]
+                 "lines" ["(a" "b)"]
+                 "mode" "indent"})]
+    (is (= (get result "lines") ["(a" " b)"]))))

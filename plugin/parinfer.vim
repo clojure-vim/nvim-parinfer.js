@@ -11,22 +11,6 @@ try
 catch
 endtry
 
-function! s:indentparen()
-  if has('nvim') && g:parinfer_mode != "off"
-    try
-      silent undojoin
-    catch
-    endtry
-    let l:saved_mode = g:parinfer_mode
-    let g:parinfer_mode = "paren"
-    let l:lines = ParinferIndent()
-    let g:parinfer_mode = l:saved_mode
-    if !empty(lines)
-      call setline(1,lines)
-    endif
-  endif
-endfunction
-
 function! s:parinferShiftCmd(vis, left) range
   if a:vis && a:left
     let l:shift_op = "norm! gv<"
@@ -75,8 +59,7 @@ noremap <silent> <Plug>ParinferShiftNormRight
 augroup Parinfer
   autocmd FileType clojure,scheme,lisp,racket
         \ :autocmd! Parinfer BufEnter <buffer>
-        \ :call <SID>indentparen()
-
+        \ :call <SID>process("BufEnter")
   autocmd FileType clojure,scheme,lisp,racket
         \ :autocmd! Parinfer TextChanged <buffer>
         \ :call <SID>process("TextChanged")
