@@ -101,7 +101,7 @@
       (.functionSync "ParinferShift"
                     #js {:eval "[getline(1,line('$'))]"}
                     parinfer-shift)
-      (.functionSync "ParinferTextChangedHandler"
+      (.functionSync "ParinferProcessEvent"
                      (fn [nvim [event] nvim-callback]
                        (nvim-callback nil (core/process event))))))
    (catch :default e

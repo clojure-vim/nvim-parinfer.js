@@ -49,11 +49,11 @@ endfunction
 
 function! s:process(event)
   let l:event = { "event": a:event,
-                \ "position": getpos(),
+                \ "position": getpos('.'),
                 \ "lines": getline(1,line('$')),
                 \ "mode": g:parinfer_mode,
                 \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
-  let l:result = ParinferTextChangedHandler(l:event)
+  let l:result = ParinferProcessEvent(l:event)
   call setline(1, l:result["lines"])
   call setpos('.', l:result["position"])
 endfunction
