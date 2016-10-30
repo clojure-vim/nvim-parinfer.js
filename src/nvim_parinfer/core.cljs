@@ -21,7 +21,7 @@
 (defn text-changed
   [event]
   (let [event (vim-dict->map event)
-        [cursorLine cursorX] (get event "position")
+        [_ cursorLine cursorX _] (get event "position")
         lines (get event "lines")
         previewCursorScope? (some-> event
                               (get "preview_cursor_scope")
@@ -34,5 +34,5 @@
                      "previewCursorScope" previewCursorScope?})]
     (-> event
       (assoc "lines" (string/split (aget result "text") #"\n"))
-      (assoc-in ["position" 1] (aget result "cursorX"))
+      (assoc-in ["position" 2] (aget result "cursorX"))
       clj->js)))

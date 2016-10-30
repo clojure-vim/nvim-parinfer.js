@@ -48,15 +48,14 @@ function! s:repeat(name, count)
 endfunction
 
 function! s:process(event)
-  let l:position = getpos('.')
   let l:event = { "event": a:event,
-                \ "position": [l:position[1] - 1, l:position[2] - 1],
+                \ "position": getpos(),
                 \ "lines": getline(1,line('$')),
                 \ "mode": g:parinfer_mode,
                 \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
   let l:result = ParinferTextChangedHandler(l:event)
   call setline(1, l:result["lines"])
-  call cursor(l:result["position"][0] + 1, l:result["position"][1] + 1)
+  call setpos('.', l:result["position"])
 endfunction
 
 noremap <silent> <Plug>ParinferShiftVisLeft
