@@ -2,11 +2,18 @@
   (:require [clojure.string :as string]
             [parinfer :as parinfer]))
 
+(def ^:private parinfer-mode-fn
+  {"indent" parinfer/indentMode
+   "paren" parinfer/parenMode})
+
 (defn- reindent
+  "Wrapper for parinfer/*Mode, translating to/from JS structures."
   [mode text options]
-  (if (= mode "indent")
-    (parinfer/indentMode text options)
-    (parinfer/parenMode text options)))
+  (let [options (clj->js options)
+        result ((parinfer-mode-fn mode) text options)]
+    {:success (aget result "success")
+     :text (aget result "text")
+     :cursorX (aget result "cursorX")}))
 
 (defn text-changed
   [{:keys [:parinfer/lines :parinfer/mode]
@@ -15,6 +22,6 @@
   (let [result (reindent
                  mode
                  (string/join "\n" lines)
-                 (clj->js {"cursorX" cursorX
-                           "cursorLine" cursorLine}))]
-    (assoc event :parinfer/lines (string/split (aget result "text") #"\n"))))
+                 {:cursorX cursorX
+                  :cursorLine cursorLine})]
+    (assoc event :parinfer/lines (string/split (:text result) #"\n"))))
