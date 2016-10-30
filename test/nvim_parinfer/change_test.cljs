@@ -1,5 +1,5 @@
 (ns nvim-parinfer.change-test
-  (:require [cljs.test :refer-macros [deftest is]]
+  (:require [cljs.test :refer-macros [deftest testing is]]
             [nvim-parinfer.core :refer [text-changed]]))
 
 (deftest t-handles-indent-mode
@@ -8,7 +8,21 @@
                :lines ["(a" "(b)"]
                :mode "indent"})
            :lines)
-         ["(a)" "(b)"])))
+         ["(a)" "(b)"]))
+  (testing ":preview-cursor-scope"
+    (let [result (text-changed
+                    {:cursor [1 4]
+                     :lines ["(a [a" "   "]
+                     :mode "indent"
+                     :preview-cursor-scope false})]
+      (is (= (:lines result) ["(a [a])" "   "])))
+    (let [result (text-changed
+                   {:cursor [1 4]
+                    :lines ["(a [a" "    "]
+                    :mode "indent"
+                    :preview-cursor-scope true})]
+      (is (= (:lines result) ["(a [a" "    ])"]))
+      (is (= (:cursor result) [1 4])))))
          
 (deftest t-handles-paren-mode
   (let [result (text-changed
