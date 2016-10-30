@@ -32,6 +32,21 @@
       f
       clj->js)))
 
+(defn- adjust-position
+  [[bufnum lnum col off] adjustment]
+  [bufnum
+   (+ lnum adjustment)
+   (+ col adjustment)
+   (+ off adjustment)])
+
+(defn- wrap-zero-based-position
+  [f]
+  (fn [event]
+    (-> event
+      (update "position" #(adjust-position % -1))
+      f
+      (update "position" #(adjust-position % +1)))))
+
 (def ^:private parinfer-mode-fn
   {"indent" parinfer/indentMode
    "paren" parinfer/parenMode})
@@ -64,5 +79,6 @@
 
 (def process
   (-> process-reindent
+    wrap-zero-based-position
     wrap-debug-log
     wrap-vim-interop))
