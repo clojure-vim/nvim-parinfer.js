@@ -78,3 +78,8 @@ export NEOVIM_JS_DEBUG=/tmp/nvim-debug.log
 tail -f ~/.nvimlog
 tail -f /tmp/nvim-debug.log
 ```
+
+Tests can be run in a watch loop like so:
+```
+lein doo node test
+```
