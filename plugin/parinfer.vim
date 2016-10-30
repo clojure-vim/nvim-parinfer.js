@@ -27,19 +27,6 @@ function! s:indentparen()
   endif
 endfunction
 
-function! s:indent()
-  if has('nvim') && g:parinfer_mode != "off"
-    try
-      silent undojoin
-    catch
-    endtry
-    let l:lines = ParinferIndent()
-    if !empty(lines)
-      call setline(1,lines)
-    endif
-  endif
-endfunction
-
 function! s:parinferShiftCmd(vis, left) range
   if a:vis && a:left
     let l:shift_op = "norm! gv<"
