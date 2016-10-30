@@ -18,7 +18,7 @@
   (into {} (for [k (.keys js/Object x)]
              [k (js->clj (aget x k))])))
 
-(defn text-changed
+(defn process
   [event]
   (let [event (vim-dict->map event)
         [_ cursorLine cursorX _] (get event "position")

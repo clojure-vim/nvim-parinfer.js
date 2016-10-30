@@ -103,7 +103,7 @@
                     parinfer-shift)
       (.functionSync "ParinferTextChangedHandler"
                      (fn [nvim [event] nvim-callback]
-                       (nvim-callback nil (core/text-changed event))))))
+                       (nvim-callback nil (core/process event))))))
    (catch :default e
      (dbg "main exception" e e.stack))))
 

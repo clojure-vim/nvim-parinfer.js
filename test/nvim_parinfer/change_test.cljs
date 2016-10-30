@@ -6,7 +6,7 @@
   [m]
   (-> m
     clj->js
-    core/text-changed
+    core/process
     js->clj))
 
 (deftest t-handles-indent-mode
