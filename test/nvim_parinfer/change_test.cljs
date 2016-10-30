@@ -11,4 +11,11 @@
            :parinfer/lines)
          ["(a)" "(b)"])))
          
-
+(deftest t-handles-paren-mode
+  (is (= (-> (text-changed
+              {:parinfer/event "TextChanged"
+               :parinfer/cursor [0 0]
+               :parinfer/lines ["(a" "b)"]
+               :parinfer/mode "paren"})
+           :parinfer/lines)
+         ["(a" " b)"])))
