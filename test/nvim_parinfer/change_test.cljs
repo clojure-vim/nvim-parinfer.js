@@ -9,18 +9,18 @@
                "parinfer_mode" "indent"})
            :lines)
          ["(a)" "(b)"]))
-  (testing ":preview-cursor-scope"
+  (testing ""parinfer_preview_cursor_scope""
     (let [result (text-changed
                     {:cursor [1 4]
                      :lines ["(a [a" "   "]
                      "parinfer_mode" "indent"
-                     :preview-cursor-scope false})]
+                     "parinfer_preview_cursor_scope" 0})]
       (is (= (:lines result) ["(a [a])" "   "])))
     (let [result (text-changed
                    {:cursor [1 4]
                     :lines ["(a [a" "    "]
                     "parinfer_mode" "indent"
-                    :preview-cursor-scope true})]
+                    "parinfer_preview_cursor_scope" 1})]
       (is (= (:lines result) ["(a [a" "    ])"]))
       (is (= (:cursor result) [1 4])))))
          
