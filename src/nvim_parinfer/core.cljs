@@ -11,9 +11,17 @@
   [mode text options]
   ((parinfer-mode-fn mode) text options))
 
+(defn- as-map
+  "js->clj doesn't want to translate Vim dictionaries for us, so we force
+  the issue."
+  [x]
+  (into {} (for [k (.keys js/Object x)]
+             [k (js->clj (aget x k))])))
+
 (defn text-changed
   [event]
-  (let [[cursorLine cursorX] (get event "position")
+  (let [event (as-map event)
+        [cursorLine cursorX] (get event "position")
         lines (get event "lines")
         previewCursorScope? (some-> event
                               (get "parinfer_preview_cursor_scope")
@@ -26,4 +34,5 @@
                      "previewCursorScope" previewCursorScope?})]
     (-> event
       (assoc "lines" (string/split (aget result "text") #"\n"))
-      (assoc-in ["position" 1] (aget result "cursorX")))))
+      (assoc-in ["position" 1] (aget result "cursorX"))
+      clj->js)))
