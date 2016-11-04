@@ -75,23 +75,23 @@ noremap <silent> <Plug>ParinferShiftNormRight
       \ :call <SID>repeat("\<Plug>ParinferShiftNormRight", v:count)<CR>
 
 augroup Parinfer
-  autocmd FileType clojure,scheme,lisp,racket
+  autocmd FileType clojure,scheme,lisp,racket,hy
         \ :autocmd! Parinfer BufEnter <buffer>
         \ :call <SID>indentparen()
 
-  autocmd FileType clojure,scheme,lisp,racket
+  autocmd FileType clojure,scheme,lisp,racket,hy
         \ :autocmd! Parinfer TextChanged,TextChangedI <buffer>
         \ :call <SID>indent()
 
-  autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> >  <Plug>ParinferShiftVisRight
-  autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> <  <Plug>ParinferShiftVisLeft
-  autocmd FileType clojure,scheme,lisp,racket :nmap <buffer> >> <Plug>ParinferShiftNormRight
-  autocmd FileType clojure,scheme,lisp,racket :nmap <buffer> << <Plug>ParinferShiftNormLeft
+  autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> >  <Plug>ParinferShiftVisRight
+  autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> <  <Plug>ParinferShiftVisLeft
+  autocmd FileType clojure,scheme,lisp,racket,hy :nmap <buffer> >> <Plug>ParinferShiftNormRight
+  autocmd FileType clojure,scheme,lisp,racket,hy :nmap <buffer> << <Plug>ParinferShiftNormLeft
 augroup END
 
 if (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1)
   function! ParinferAirline(...)
-    if &filetype =~ '.*\(clojure\|scheme\|lisp\|racket\).*'
+    if &filetype =~ '.*\(clojure\|scheme\|lisp\|racket\|hy\).*'
       let w:airline_section_a = g:airline_section_a . ' %{g:parinfer_mode}'
     endif
   endfunction
