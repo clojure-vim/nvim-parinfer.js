@@ -5,13 +5,21 @@
  :dependencies [[org.clojure/clojure "1.8.0"]
                 [org.clojure/clojurescript "1.8.40"]]
 
- :plugins [[lein-cljsbuild "1.1.2"]
-           [lein-npm "0.6.1"]
-           [lein-doo "0.1.7"]]
+ :npm {:dependencies [[parinfer "1.8.1"]
+                      [source-map-support "0.3.3"]
+                      [ws "1.0.1"]]}
 
- :npm {:dependencies [[parinfer "1.8.1"]]}
+ :plugins [[lein-cljsbuild "1.1.2"]
+           [lein-figwheel "0.5.0-6"]
+           [lein-npm "0.6.1"]]
+
+ :source-paths ["src" "target/classes"]
+
+ :test-paths ["test"]
 
  :clean-targets ["rplugin/node/nvim-parinfer" "rplugin/node/nvim-parinfer.js"]
+
+ :figwheel {:server-port 9444}
 
  :cljsbuild {:builds [{:id "plugin"
                        :source-paths ["src"]
@@ -29,18 +37,15 @@
                                   :closure-warnings {:const :off}
                                   :externs ["plugin.externs.js"]
                                   :source-map "rplugin/node/nvim-parinfer.js.map"}}
-                      {:id "test"
+                      {:id "fig-test"
                        :source-paths ["src" "test"]
+                       :figwheel {:on-jsload "nvim-parinfer.test-runner/test-it"}
                        :compiler {:main nvim-parinfer.test-runner
-                                  :asset-path "target/doo/test"
-                                  :hashbang false
-                                  :output-to "target/doo/test.js"
-                                  :output-dir "target/doo/test"
-                                  :optimizations :simple
+                                  :output-to "target/out/tests.js"
+                                  :output-dir "target/out"
                                   :target :nodejs
-                                  :cache-analysis true
+                                  :optimizations :none
                                   :foreign-libs [{:file "node_modules/parinfer/parinfer.js"
                                                   :provides ["parinfer"]
                                                   :module-type :commonjs}]
-                                  :closure-warnings {:const :off}
-                                  :source-map "target/doo/test.js.map"}}]})
+                                  :source-map true}}]})
