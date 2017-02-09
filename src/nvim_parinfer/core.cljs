@@ -52,7 +52,7 @@
   [mode text options]
   (case mode
     "indent" (parinfer/indentMode text options)
-    "paren"  (parinfer/parentMode text options)))
+    "paren"  (parinfer/parenMode text options)))
 
 (defn- process-reindent
   [event]
