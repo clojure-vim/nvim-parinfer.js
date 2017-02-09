@@ -47,14 +47,12 @@
       f
       (update "position" adjust-position +1))))
 
-(def ^:private parinfer-mode-fn
-  {"indent" parinfer/indentMode
-   "paren" parinfer/parenMode})
-
 (defn- reindent
   "Wrapper for *Mode, translating to/from JS structures."
   [mode text options]
-  ((parinfer-mode-fn mode) text options))
+  (case mode
+    "indent" (parinfer/indentMode text options)
+    "paren"  (parinfer/parentMode text options)))
 
 (defn- process-reindent
   [event]
