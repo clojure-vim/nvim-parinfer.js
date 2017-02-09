@@ -79,7 +79,7 @@ tail -f ~/.nvimlog
 tail -f /tmp/nvim-debug.log
 ```
 
-Tests can be run in a watch loop like so:
-```
-lein doo node test
-```
+Tests can be run in a watch by starting two separate terminals:
+
+1. `$ rlwrap lein figwheel`
+2. `$ node target/out/tests.js`
