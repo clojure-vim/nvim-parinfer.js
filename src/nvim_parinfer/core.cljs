@@ -43,9 +43,9 @@
   [f]
   (fn [event]
     (-> event
-      (update "position" #(adjust-position % -1))
+      (update "position" adjust-position -1)
       f
-      (update "position" #(adjust-position % +1)))))
+      (update "position" adjust-position +1))))
 
 (def ^:private parinfer-mode-fn
   {"indent" parinfer/indentMode
