@@ -11,6 +11,21 @@ try
 catch
 endtry
 
+function! s:toggleMode()
+  if g:parinfer_mode == "indent"
+    let g:parinfer_mode = "paren"
+  else
+    let g:parinfer_mode = "indent"
+  endif
+endfunction
+
+function! s:turnOff()
+  let g:parinfer_mode = "off"
+endfunction
+
+command! ParinferToggleMode call <SID>toggleMode()
+command! ParinferOff call <SID>turnOff()
+
 function! s:indentparen()
   if has('nvim') && g:parinfer_mode != "off"
     try
