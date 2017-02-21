@@ -26,11 +26,34 @@
 
 (defn- wrap-vim-interop
   [f]
+  (comp clj->js f vim-dict->map))
+
+(defn- make-patch
+  "Given lines before and after a change, computes which lines to send back.
+
+  The patch format is [[n [line-n line-n+1 ...]] ...]."
+  [a b]
+  (->> (map vector (map inc (range)) a b)
+    (remove (fn [[_ a b]] (= a b)))
+    (map (fn [[n _ b]] [n b]))
+    (reduce
+      (fn [patch [n line]]
+        (if-let [[last-n last-lines :as last-op] (peek patch)]
+          (if (= n (+ last-n (count last-lines)))
+            (conj (pop patch) [last-n (conj last-lines line)])
+            (conj patch [n [line]]))
+          (conj patch [n [line]])))
+      [])))
+
+(defn- wrap-vim-patch
+  [f]
   (fn [event]
-    (-> event
-      vim-dict->map
-      f
-      clj->js)))
+    (let [a-lines (get event "lines")
+          result (f event)
+          b-lines (get result "lines")]
+      (-> result
+        (dissoc "lines")
+        (assoc "patch" (make-patch a-lines b-lines))))))
 
 (defn- adjust-position
   [[bufnum lnum col off] adjustment]
@@ -79,4 +102,5 @@
   (-> process-reindent
     wrap-zero-based-position
     wrap-debug-log
+    wrap-vim-patch
     wrap-vim-interop))

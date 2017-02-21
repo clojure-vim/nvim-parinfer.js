@@ -38,9 +38,9 @@ function! s:process(event)
                 \ "mode": g:parinfer_mode,
                 \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
   let l:result = ParinferProcessEvent(l:event)
-  if l:result["lines"] !=# l:event["lines"]
-    call setline(1, l:result["lines"])
-  endif
+  for [l:n, l:ls] in l:result["patch"]
+    call setline(l:n, l:ls)
+  endfor
   call setpos('.', l:result["position"])
 endfunction
 

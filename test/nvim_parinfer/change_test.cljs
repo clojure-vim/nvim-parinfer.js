@@ -2,12 +2,27 @@
   (:require [cljs.test :refer-macros [deftest testing is]]
             [nvim-parinfer.core :as core]))
 
+(defn- unpatch
+  [result event]
+  (assoc
+    result
+    "lines"
+    (->> (get result "patch")
+     (mapcat
+       (fn [[first-n ls]]
+         (map vector (range first-n (+ first-n (count ls))) ls)))
+     (reduce
+       (fn [ls [n l]]
+         (assoc ls (dec n) l))
+       (get event "lines")))))
+
 (defn- result-of
   [m]
   (-> m
     clj->js
     core/process
-    js->clj))
+    js->clj
+    (unpatch m)))
 
 (deftest t-handles-indent-mode
   (is (= (-> (result-of
