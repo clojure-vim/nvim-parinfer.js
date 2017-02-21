@@ -4,17 +4,19 @@
 
 (defn- unpatch
   [result event]
-  (assoc
-    result
-    "lines"
-    (->> (get result "patch")
-     (mapcat
-       (fn [[first-n ls]]
-         (map vector (range first-n (+ first-n (count ls))) ls)))
-     (reduce
-       (fn [ls [n l]]
-         (assoc ls (dec n) l))
-       (get event "lines")))))
+  (if-not result
+    event
+    (assoc
+      result
+      "lines"
+      (->> (get result "patch")
+       (mapcat
+         (fn [[first-n ls]]
+           (map vector (range first-n (+ first-n (count ls))) ls)))
+       (reduce
+         (fn [ls [n l]]
+           (assoc ls (dec n) l))
+         (get event "lines"))))))
 
 (defn- result-of
   [m]

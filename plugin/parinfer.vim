@@ -54,14 +54,16 @@ function! s:process(event)
                   \ "mode": g:parinfer_mode,
                   \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
     let l:result = ParinferProcessEvent(l:event)
-    for [l:n, l:ls] in l:result["patch"]
-      try
-        silent undojoin
-      catch
-      endtry
-      call setline(l:n, l:ls)
-    endfor
-    call setpos('.', l:result["position"])
+    if !empty(l:result)
+      for [l:n, l:ls] in l:result["patch"]
+        try
+          silent undojoin
+        catch
+        endtry
+        call setline(l:n, l:ls)
+      endfor
+      call setpos('.', l:result["position"])
+    endif
   endif
 endfunction
 

@@ -28,6 +28,13 @@
   [f]
   (comp clj->js f vim-dict->map))
 
+(defn- wrap-nil-on-no-change
+  [f]
+  (fn [event]
+    (let [result (f event)]
+      (when-not (zero? (count (get result "patch")))
+        result))))
+
 (defn- make-patch
   "Given lines before and after a change, computes which lines to send back.
 
@@ -101,6 +108,7 @@
 (def process
   (-> process-reindent
     wrap-zero-based-position
-    wrap-debug-log
     wrap-vim-patch
+    wrap-nil-on-no-change
+    wrap-debug-log
     wrap-vim-interop))
