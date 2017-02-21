@@ -11,6 +11,21 @@ try
 catch
 endtry
 
+function! s:toggleMode()
+  if g:parinfer_mode == "indent"
+    let g:parinfer_mode = "paren"
+  else
+    let g:parinfer_mode = "indent"
+  endif
+endfunction
+
+function! s:turnOff()
+  let g:parinfer_mode = "off"
+endfunction
+
+command! ParinferToggleMode call <SID>toggleMode()
+command! ParinferOff call <SID>turnOff()
+
 function! s:parinferShiftCmd(vis, left) range
   if a:vis && a:left
     let l:shift_op = "norm! gv<"
@@ -32,16 +47,22 @@ function! s:repeat(name, count)
 endfunction
 
 function! s:process(event)
-  let l:event = { "event": a:event,
-                \ "position": getpos('.'),
-                \ "lines": getline(1,line('$')),
-                \ "mode": g:parinfer_mode,
-                \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
-  let l:result = ParinferProcessEvent(l:event)
-  for [l:n, l:ls] in l:result["patch"]
-    call setline(l:n, l:ls)
-  endfor
-  call setpos('.', l:result["position"])
+  if has('nvim') && g:parinfer_mode != "off"
+    let l:event = { "event": a:event,
+                  \ "position": getpos('.'),
+                  \ "lines": getline(1,line('$')),
+                  \ "mode": g:parinfer_mode,
+                  \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
+    let l:result = ParinferProcessEvent(l:event)
+    for [l:n, l:ls] in l:result["patch"]
+      try
+        silent undojoin
+      catch
+      endtry
+      call setline(l:n, l:ls)
+    endfor
+    call setpos('.', l:result["position"])
+  endif
 endfunction
 
 noremap <silent> <Plug>ParinferShiftVisLeft
@@ -59,25 +80,25 @@ noremap <silent> <Plug>ParinferShiftNormRight
       \ :call <SID>repeat("\<Plug>ParinferShiftNormRight", v:count)<CR>
 
 augroup Parinfer
-  autocmd FileType clojure,scheme,lisp,racket
+  autocmd FileType clojure,scheme,lisp,racket,hy
         \ :autocmd! Parinfer BufEnter <buffer>
         \ :call <SID>process("BufEnter")
-  autocmd FileType clojure,scheme,lisp,racket
+  autocmd FileType clojure,scheme,lisp,racket,hy
         \ :autocmd! Parinfer TextChanged <buffer>
         \ :call <SID>process("TextChanged")
-  autocmd FileType clojure,scheme,lisp,racket
+  autocmd FileType clojure,scheme,lisp,racket,hy
         \ :autocmd! Parinfer TextChangedI <buffer>
         \ :call <SID>process("TextChangedI")
 
-  autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> >  <Plug>ParinferShiftVisRight
-  autocmd FileType clojure,scheme,lisp,racket :vmap <buffer> <  <Plug>ParinferShiftVisLeft
-  autocmd FileType clojure,scheme,lisp,racket :nmap <buffer> >> <Plug>ParinferShiftNormRight
-  autocmd FileType clojure,scheme,lisp,racket :nmap <buffer> << <Plug>ParinferShiftNormLeft
+  autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> >  <Plug>ParinferShiftVisRight
+  autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> <  <Plug>ParinferShiftVisLeft
+  autocmd FileType clojure,scheme,lisp,racket,hy :nmap <buffer> >> <Plug>ParinferShiftNormRight
+  autocmd FileType clojure,scheme,lisp,racket,hy :nmap <buffer> << <Plug>ParinferShiftNormLeft
 augroup END
 
 if (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1)
   function! ParinferAirline(...)
-    if &filetype =~ '.*\(clojure\|scheme\|lisp\|racket\).*'
+    if &filetype =~ '.*\(clojure\|scheme\|lisp\|racket\|hy\).*'
       let w:airline_section_a = g:airline_section_a . ' %{g:parinfer_mode}'
     endif
   endfunction
