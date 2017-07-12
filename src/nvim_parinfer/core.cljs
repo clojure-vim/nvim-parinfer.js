@@ -78,7 +78,6 @@
       (update "position" adjust-position +1))))
 
 (defn- reindent
-  "Wrapper for *Mode, translating to/from JS structures."
   [mode text options]
   (case mode
     "indent" (parinfer/indentMode text options)
