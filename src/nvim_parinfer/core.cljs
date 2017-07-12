@@ -110,5 +110,5 @@
     wrap-zero-based-position
     wrap-vim-patch
     wrap-nil-on-no-change
-    wrap-debug-log
+    ;wrap-debug-log  ;uncomment to log all requests and responses
     wrap-vim-interop))
