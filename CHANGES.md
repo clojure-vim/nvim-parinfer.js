@@ -1,3 +1,7 @@
+#0.6.0
+- process event refactor (thanks eraserhd)
+- Working with node-host merge into neovim (https://github.com/neovim/neovim/pull/7458)
+
 #0.5.3
 - fix initial load using cursorDX (thanks eraserhd)
 

@@ -1,4 +1,4 @@
-(defproject nvim-parinfer "0.5.3"
+(defproject nvim-parinfer "0.6.0"
  :description "A neovim parinfer plugin"
  :url "http://github.com/snoe/nvim-parinfer.js"
 
@@ -7,7 +7,8 @@
 
  :npm {:dependencies [[parinfer "1.8.1"]
                       [source-map-support "0.3.3"]
-                      [ws "1.0.1"]]}
+                      [ws "1.0.1"]
+                      [neovim "3.5.0"]]}
 
  :plugins [[lein-cljsbuild "1.1.2"]
            [lein-figwheel "0.5.0-6"]

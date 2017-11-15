@@ -32,7 +32,7 @@
        "|let &shiftwidth=l:oldsw"))
 
 (defn parinfer-shift
-  [nvim [shift-op startline endline] [lines] nvim-callback]
+  [nvim [shift-op startline endline] [lines]]
   (let [result (run-indent (.join lines "\n")
                            #js {"cursorX" 0 "cursorLine" (dec startline)}
                            "indent"
@@ -47,25 +47,26 @@
                  (shift-command startline endline (- first-char prev-stop) shift-op))
                (when-let [next-stop (first (filter (partial < first-char) stops))]
                  (shift-command startline endline (- next-stop first-char) shift-op)))]
-      (.command nvim dynamic-shift-op
-                (fn [& args]
-                 (nvim-callback nil true)))
-      (.command nvim shift-op
-                (fn [& args]
-                  (nvim-callback nil true))))))
+      (.command nvim dynamic-shift-op #js {:sync true})
+      (.command nvim shift-op #js {:sync true}))
+    true))
 
 (defn -main []
-  (try
-   (when (exists? js/plugin)
-     (js/debug "hello parinfer")
-     (doto js/plugin
-      (.functionSync "ParinferShift"
-                    #js {:eval "[getline(1,line('$'))]"}
-                    parinfer-shift)
-      (.functionSync "ParinferProcessEvent"
-                     (fn [nvim [event] nvim-callback]
-                       (nvim-callback nil (core/process event))))))
-   (catch :default e
-     (core/dbg "main exception" e e.stack))))
+  (let [nvim (js/require "neovim")
+        plugin (fn [])]
+
+    (set! (.. plugin -prototype -ParinferShift)
+          ((.Function nvim "ParinferShift"
+                      #js {:sync true
+                           :eval "[getline(1,line('$'))]"})
+           (fn [params eval-args]
+             (this-as this
+               (parinfer-shift (.-nvim this) params eval-args)))))
+    (set! (.. plugin -prototype -ParinferProcessEvent)
+          ((.Function nvim "ParinferProcessEvent"
+                      #js {:sync true})
+           (fn [[event]] (this-as this
+                           (core/process event)))))
+    (set! (.-exports js/module) ((.Plugin nvim #js {}) plugin))))
 
 (set! *main-cli-fn* -main)

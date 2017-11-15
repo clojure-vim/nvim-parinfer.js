@@ -8,9 +8,9 @@ https://shaunlebron.github.io/parinfer
 ### Pre-requisites
 [Install node.js](https://nodejs.org)
 
-[Install latest neovim](https://github.com/neovim/neovim/wiki/Installing-Neovim)
+[Install neovim HEAD](https://github.com/neovim/neovim/wiki/Installing-Neovim)
 
-[Install node-host](https://github.com/neovim/node-host)
+[Install node-client](https://github.com/neovim/node-client) `npm install -g neovim`
 
 ### Vundle
 
@@ -74,8 +74,7 @@ This is, maybe, not optimized enough - it reads and writes the entire buffer wit
 
 If you want to see what the plugin is doing, you probably want to:
 ```
-export NEOVIM_JS_DEBUG=/tmp/nvim-debug.log
-tail -f ~/.nvimlog
+export NVIM_NODE_LOG_FILE=/tmp/nvim-debug.log
 tail -f /tmp/nvim-debug.log
 ```
 
