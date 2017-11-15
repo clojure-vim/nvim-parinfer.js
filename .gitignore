@@ -4,5 +4,6 @@
 /node_modules
 /figwheel_server.log
 /target
+!/target/doo/test/.gitkeep
 /rplugin/node/nvim-parinfer.js.map
 /rplugin/node/nvim-parinfer/

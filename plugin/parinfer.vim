@@ -26,35 +26,6 @@ endfunction
 command! ParinferToggleMode call <SID>toggleMode()
 command! ParinferOff call <SID>turnOff()
 
-function! s:indentparen()
-  if has('nvim') && g:parinfer_mode != "off"
-    try
-      silent undojoin
-    catch
-    endtry
-    let l:saved_mode = g:parinfer_mode
-    let g:parinfer_mode = "paren"
-    let l:lines = ParinferIndent()
-    let g:parinfer_mode = l:saved_mode
-    if !empty(lines)
-      call setline(1,lines)
-    endif
-  endif
-endfunction
-
-function! s:indent()
-  if has('nvim') && g:parinfer_mode != "off"
-    try
-      silent undojoin
-    catch
-    endtry
-    let l:lines = ParinferIndent()
-    if !empty(lines)
-      call setline(1,lines)
-    endif
-  endif
-endfunction
-
 function! s:parinferShiftCmd(vis, left) range
   if a:vis && a:left
     let l:shift_op = "norm! gv<"
@@ -75,6 +46,27 @@ function! s:repeat(name, count)
   endif
 endfunction
 
+function! s:process(event)
+  if has('nvim') && g:parinfer_mode != "off"
+    let l:event = { "event": a:event,
+                  \ "position": getpos('.'),
+                  \ "lines": getline(1,line('$')),
+                  \ "mode": g:parinfer_mode,
+                  \ "preview_cursor_scope": g:parinfer_preview_cursor_scope }
+    let l:result = ParinferProcessEvent(l:event)
+    if !empty(l:result)
+      for [l:n, l:ls] in l:result["patch"]
+        try
+          silent undojoin
+        catch
+        endtry
+        call setline(l:n, l:ls)
+      endfor
+      call setpos('.', l:result["position"])
+    endif
+  endif
+endfunction
+
 noremap <silent> <Plug>ParinferShiftVisLeft
       \ :call <SID>parinferShiftCmd(1, 1)<CR>
       \ :call <SID>repeat("\<Plug>ParinferShiftVisLeft", v:count)<CR>
@@ -92,11 +84,13 @@ noremap <silent> <Plug>ParinferShiftNormRight
 augroup Parinfer
   autocmd FileType clojure,scheme,lisp,racket,hy
         \ :autocmd! Parinfer BufEnter <buffer>
-        \ :call <SID>indentparen()
-
+        \ :call <SID>process("BufEnter")
   autocmd FileType clojure,scheme,lisp,racket,hy
-        \ :autocmd! Parinfer TextChanged,TextChangedI <buffer>
-        \ :call <SID>indent()
+        \ :autocmd! Parinfer TextChanged <buffer>
+        \ :call <SID>process("TextChanged")
+  autocmd FileType clojure,scheme,lisp,racket,hy
+        \ :autocmd! Parinfer TextChangedI <buffer>
+        \ :call <SID>process("TextChangedI")
 
   autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> >  <Plug>ParinferShiftVisRight
   autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> <  <Plug>ParinferShiftVisLeft
