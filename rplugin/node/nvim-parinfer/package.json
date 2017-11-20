@@ -1,0 +1,6 @@
+{
+  "main": "nvim-parinfer.js",
+  "dependencies": {
+    "neovim": "3.5.x"
+  }
+}

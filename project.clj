@@ -18,17 +18,17 @@
 
  :test-paths ["test"]
 
- :clean-targets ["rplugin/node/nvim-parinfer" "rplugin/node/nvim-parinfer.js"]
+ :clean-targets ["rplugin/node/nvim-parinfer/out" "rplugin/node/nvim-parinfer/nvim-parinfer.js"]
 
  :figwheel {:server-port 9444}
 
  :cljsbuild {:builds [{:id "plugin"
                        :source-paths ["src"]
                        :compiler {:main nvim-parinfer.main
-                                  :asset-path "rplugin/node/nvim-parinfer"
+                                  :asset-path "rplugin/node/nvim-parinfer/out"
                                   :hashbang false
-                                  :output-to "rplugin/node/nvim-parinfer.js"
-                                  :output-dir "rplugin/node/nvim-parinfer"
+                                  :output-to "rplugin/node/nvim-parinfer/nvim-parinfer.js"
+                                  :output-dir "rplugin/node/nvim-parinfer/out"
                                   :optimizations :simple
                                   :target :nodejs
                                   :cache-analysis true
@@ -37,7 +37,7 @@
                                                   :module-type :commonjs}]
                                   :closure-warnings {:const :off}
                                   :externs ["plugin.externs.js"]
-                                  :source-map "rplugin/node/nvim-parinfer.js.map"}}
+                                  :source-map "rplugin/node/nvim-parinfer/nvim-parinfer.js.map"}}
                       {:id "fig-test"
                        :source-paths ["src" "test"]
                        :figwheel {:on-jsload "nvim-parinfer.test-runner/test-it"}
