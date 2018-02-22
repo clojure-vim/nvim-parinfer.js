@@ -35,6 +35,13 @@ You can `let g:parinfer_mode = "indent"` to switch to indent-mode.
 You can `let g:parinfer_mode = "paren"` to switch to paren-mode.
 
 Indent (`>>`) and dedent (`<<`) mappings have been made to dynamically align elements to tabstops that will change the structure of the code.
+Default mappings can be overridden:
+```VimL
+let g:parinfer_shift_norm_right_map = '<space>>'
+let g:parinfer_shift_norm_left_map = '<space><'
+let g:parinfer_shift_vis_right_map = 'g>'
+let g:parinfer_shift_vis_left_map = 'g<'
+```
 
 You can enable Parinfers previewCursorScope option with `let g:parinfer_preview_cursor_scope = 1` (default is 0)
 
