@@ -6,6 +6,22 @@ if !exists('g:parinfer_preview_cursor_scope')
   let g:parinfer_preview_cursor_scope = 0
 endif
 
+if !exists('g:parinfer_shift_norm_right_map')
+  let g:parinfer_shift_norm_right_map = '>>'
+endif
+
+if !exists('g:parinfer_shift_norm_left_map')
+  let g:parinfer_shift_norm_left_map = '<<'
+endif
+
+if !exists('g:parinfer_shift_vis_right_map')
+  let g:parinfer_shift_vis_right_map = '>'
+endif
+
+if !exists('g:parinfer_shift_vis_left_map')
+  let g:parinfer_shift_vis_left_map = '<'
+endif
+
 try
   silent! call repeat#set('')
 catch
@@ -92,10 +108,10 @@ augroup Parinfer
         \ :autocmd! Parinfer TextChangedI <buffer>
         \ :call <SID>process("TextChangedI")
 
-  autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> >  <Plug>ParinferShiftVisRight
-  autocmd FileType clojure,scheme,lisp,racket,hy :vmap <buffer> <  <Plug>ParinferShiftVisLeft
-  autocmd FileType clojure,scheme,lisp,racket,hy :nmap <buffer> >> <Plug>ParinferShiftNormRight
-  autocmd FileType clojure,scheme,lisp,racket,hy :nmap <buffer> << <Plug>ParinferShiftNormLeft
+  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_vis_right_map . ' <Plug>ParinferShiftVisRight'
+  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_vis_left_map . ' <Plug>ParinferShiftVisLeft'
+  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_norm_right_map . ' <Plug>ParinferShiftNormRight'
+  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_norm_left_map . ' <Plug>ParinferShiftNormLeft'
 augroup END
 
 if (exists('g:parinfer_airline_integration') ? g:parinfer_airline_integration : 1)
