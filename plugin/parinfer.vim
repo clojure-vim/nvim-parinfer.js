@@ -108,8 +108,8 @@ augroup Parinfer
         \ :autocmd! Parinfer TextChangedI <buffer>
         \ :call <SID>process("TextChangedI")
 
-  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_vis_right_map . ' <Plug>ParinferShiftVisRight'
-  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_vis_left_map . ' <Plug>ParinferShiftVisLeft'
+  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'vmap <buffer> ' . g:parinfer_shift_vis_right_map . ' <Plug>ParinferShiftVisRight'
+  autocmd FileType clojure,scheme,lisp,racket,hy :exec 'vmap <buffer> ' . g:parinfer_shift_vis_left_map . ' <Plug>ParinferShiftVisLeft'
   autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_norm_right_map . ' <Plug>ParinferShiftNormRight'
   autocmd FileType clojure,scheme,lisp,racket,hy :exec 'nmap <buffer> ' . g:parinfer_shift_norm_left_map . ' <Plug>ParinferShiftNormLeft'
 augroup END
