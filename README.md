@@ -1,3 +1,19 @@
+# DEPRECATED 2018-04-01
+
+Please use https://github.com/eraserhd/parinfer-rust
+
+@eraserhd has built a much better version of this plugin, that works in vim and neovim, without the trouble of remote plugins, and implements new parinfer features like smart mode.
+
+## Postmortem
+
+Today [node-host](https://github.com/neovim/node-host) has been merged into neovim but both the host and [node-client](https://github.com/neovim/node-client) libraries had a number of bugs early on that made it difficult for users of this plugin to get work done since bug fixes involved coordination with up to 5 different library authors and repositories. When node-host was merged into neovim I was able to update this plugin to work for me but it seems that others are having real problems getting it to work in their setups.
+
+Another difficulty that has lessened been recently, is writing node.js compatible scripts with clojurescript. Working with npm modules as a script is something that Lumo is tackling but it's unclear if Lumo can be used with node-host. The CLJS core team is still working towards better compatibility with the node platform but my understanding is that a lot of the work needs to be done google closure.
+
+I still believe that clojure/script is a great language for writing tools for clojure. [rewrite-cljs](https://github.com/rundis/rewrite-cljs) and [rewrite-clj](https://github.com/xsc/rewrite-clj) are top notch libraries that make manipulating your source code a breeze. However the approach taken here is built on too many transitive dependencies and too many moving pieces to be a realiable enough tool.
+
+---
+
 neovim plugin for parinfer
 https://shaunlebron.github.io/parinfer
 
